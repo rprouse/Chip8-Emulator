@@ -27,55 +27,124 @@ namespace Chip8
             0xF0, 0x80, 0xF0, 0x80, 0x80  // F
         };
 
-        public byte[] Memory { get; private set; }
+        public byte[] Memory { get; } = new byte[4096];
 
-        public uint PC { get; private set; }
+        public uint PC { get; private set; } = 0x200;
 
-        public uint I {  get; private set; }
+        public uint I { get; private set; }
 
-        public Stack<uint> Stack { get; private set; }
+        public Stack<uint> Stack { get; } = new Stack<uint>();
 
         public byte DelayTimer { get; private set; }
 
         public byte SoundTimer { get; private set; }
 
-        public byte V0 => _registers[0x0];
-        public byte V1 => _registers[0x1];
-        public byte V2 => _registers[0x2];
-        public byte V3 => _registers[0x3];
-        public byte V4 => _registers[0x4];
-        public byte V5 => _registers[0x5];
-        public byte V6 => _registers[0x6];
-        public byte V7 => _registers[0x7];
-        public byte V8 => _registers[0x8];
-        public byte V9 => _registers[0x9];
-        public byte VA => _registers[0xA];
-        public byte VB => _registers[0xB];
-        public byte VC => _registers[0xC];
-        public byte VD => _registers[0xD];
-        public byte VE => _registers[0xE];
-        public byte VF => _registers[0xF];
+        public byte[] V { get; } = new byte[16];
 
-        private byte[] _registers;
+        public bool RequiresRedraw { get; private set; }
 
-        private Stopwatch _stopwatch;
+        public byte[] Display { get; private set; } = new byte[64 * 32 / 8];
 
-        public Chip8Emulator() 
-        {
-            Memory = new byte[4096];
-            LoadFont();
-            PC = 0x200;
-            I = 0x0;
-            Stack = new Stack<uint>();
-            DelayTimer = 0;
-            SoundTimer = 0;
-            _registers = new byte[16];
-            _stopwatch = new Stopwatch();
-        }
+        private Stopwatch _stopwatch = new Stopwatch();
 
-        private void LoadFont()
+        public Chip8Emulator()
         {
             Array.Copy(Font, 0, Memory, FontMemory, Font.Length);
+        }
+
+        public void LoadRom(string filename)
+        {
+            byte[] rom = File.ReadAllBytes(filename);
+            Array.Copy(rom, 0, Memory, ProgramMemory, rom.Length);
+        }
+
+        public void Run()
+        {
+            while (true)
+            {
+                RequiresRedraw = false;
+                uint opcode = (uint)( Memory[PC] << 8 | Memory[PC + 1] );
+                PC += 2;
+
+                var instruction = opcode & 0xF000;
+
+                switch (instruction)
+                {
+                    case 0x0000:
+                        if (opcode == 0x00E0)
+                        {
+                            // Clear Screen
+                            Display = new byte[64 * 32 / 8];
+                            RequiresRedraw = true;
+                        }
+                        else
+                        {
+                            // Call machine language subroutine
+                            throw new NotImplementedException();
+                        }
+                        break;
+                    case 0x1000:
+                        // Jump
+                        PC = opcode & 0x0FFF;
+                        break;
+                    case 0x2000:
+                        throw new NotImplementedException();
+                        break;
+                    case 0x3000:
+                        throw new NotImplementedException();
+                        break;
+                    case 0x4000:
+                        throw new NotImplementedException();
+                        break;
+                    case 0x5000:
+                        throw new NotImplementedException();
+                        break;
+                    case 0x6000:
+                        // Set register
+                        {
+                            uint register = (opcode & 0x0F00) >> 8;
+                            byte value = (byte)(opcode & 0x00FF);
+                            V[register] = value;
+                        }
+                        break;
+                    case 0x7000:
+                        // Add value to register
+                        {
+                            uint register = (opcode & 0x0F00) >> 8;
+                            byte value = (byte)(opcode & 0x00FF);
+                            V[register] += value;
+                        }
+                        break;
+                    case 0x8000:
+                        throw new NotImplementedException();
+                        break;
+                    case 0x9000:
+                        throw new NotImplementedException();
+                        break;
+                    case 0xA000:
+                        // Set index register I
+                        I = opcode & 0x0FFF;
+                        break;
+                    case 0xB000:
+                        throw new NotImplementedException();
+                        break;
+                    case 0xC000:
+                        throw new NotImplementedException();
+                        break;
+                    case 0xD000:
+                        // Display/draw
+                        uint x = V[opcode & 0x0F00];
+                        uint y = V[opcode & 0x00F0];
+                        uint n = opcode & 0x000F;
+                        break;
+                    case 0xE000:
+                        throw new NotImplementedException();
+                        break;
+                    case 0xF000:
+                        throw new NotImplementedException();
+                        break;
+                }
+            }
         }
     }
 }
