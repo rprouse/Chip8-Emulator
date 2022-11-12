@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Runtime.Intrinsics.X86;
 
 namespace Chip8
 {
@@ -33,15 +32,15 @@ namespace Chip8
         /// <summary>
         /// Program counter
         /// </summary>
-        public uint PC { get; private set; } = 0x200;
+        public ushort PC { get; set; } = 0x200;
 
-        public uint I { get; private set; }
+        public ushort I { get; set; }
 
-        public Stack<uint> Stack { get; } = new Stack<uint>();
+        public Stack<ushort> Stack { get; } = new Stack<ushort>();
 
-        public byte DelayTimer { get; private set; }
+        public byte DelayTimer { get; set; }
 
-        public byte SoundTimer { get; private set; }
+        public byte SoundTimer { get; set; }
 
         /// <summary>
         /// Registers V0 to VF
@@ -50,18 +49,18 @@ namespace Chip8
 
         bool _requiresRedraw;
 
-        bool[] _display = new bool[64 * 32];
+        bool[] _screen = new bool[64 * 32];
 
         readonly Stopwatch _stopwatch = new Stopwatch();
 
-        readonly Action<uint>[] _instructions;
+        readonly Action<ushort>[] _instructions;
 
         readonly Action<bool[]> _drawScreen;
 
         public Chip8Emulator(Action<bool[]> drawScreen)
         {
             Array.Copy(Font, 0, Memory, FontMemory, Font.Length);
-            _instructions = new Action<uint>[]
+            _instructions = new Action<ushort>[]
             {
                 Instruction0, Instruction1, Instruction2, Instruction3,
                 Instruction4, Instruction5, Instruction6, Instruction7,
@@ -73,6 +72,9 @@ namespace Chip8
 
         public void LoadRom(string filename)
         {
+            if (!File.Exists(filename))
+                throw new FileNotFoundException(filename);
+
             byte[] rom = File.ReadAllBytes(filename);
             Array.Copy(rom, 0, Memory, ProgramMemory, rom.Length);
         }
@@ -81,26 +83,31 @@ namespace Chip8
         {
             while (true)
             {
-                PC += 2;
                 _requiresRedraw = false;
-                uint opcode = (uint)(Memory[PC] << 8 | Memory[PC + 1]);
+                ushort opcode = (ushort)(Memory[PC++] << 8 | Memory[PC++]);
                 var instruction = (opcode & 0xF000) >> 12;
                 _instructions[instruction](opcode);
 
                 if (_requiresRedraw)
-                    _drawScreen(_display);
+                    _drawScreen(_screen);
             }
         }
+
+        byte X(ushort opcode) => (byte)((opcode & 0x0F00) >> 8);
+        byte Y(ushort opcode) => (byte)((opcode & 0x00F0) >> 4);
+        byte N(ushort opcode) => (byte)(opcode & 0x000F);
+        byte NN(ushort opcode) => (byte)(opcode & 0x00FF);
+        ushort NNN(ushort opcode) => (ushort)(opcode & 0x0FFF);
 
         // 00E0 - CLS
         // 00EE - RET
         // 0nnn - SYS addr
-        private void Instruction0(uint opcode)
+        void Instruction0(ushort opcode)
         {
             if (opcode == 0x00E0)
             {
                 // Clear Screen
-                _display = new bool[64 * 32];
+                _screen = new bool[64 * 32];
                 _requiresRedraw = true;
             }
             else if (opcode == 0x00EE)
@@ -116,51 +123,51 @@ namespace Chip8
         }
 
         // 1nnn - JP addr
-        private void Instruction1(uint opcode)
+        void Instruction1(ushort opcode)
         {
             // Jump
-            PC = opcode & 0x0FFF;
+            PC = NNN(opcode);
         }
 
         // 2nnn - CALL addr
-        private void Instruction2(uint opcode)
+        void Instruction2(ushort opcode)
         {
             throw new NotImplementedException();
         }
 
         // 3xkk - SE Vx, byte
-        private void Instruction3(uint opcode)
+        void Instruction3(ushort opcode)
         {
             throw new NotImplementedException();
         }
 
         // 4xkk - SNE Vx, byte
-        private void Instruction4(uint opcode)
+        void Instruction4(ushort opcode)
         {
             throw new NotImplementedException();
         }
 
         // 5xy0 - SE Vx, Vy
-        private void Instruction5(uint opcode)
+        void Instruction5(ushort opcode)
         {
             throw new NotImplementedException();
         }
 
         // 6xkk - LD Vx, byte
-        private void Instruction6(uint opcode)
+        void Instruction6(ushort opcode)
         {
             // Set register
-            uint register = (opcode & 0x0F00) >> 8;
-            byte value = (byte)(opcode & 0x00FF);
+            byte register = X(opcode);
+            byte value = NN(opcode);
             V[register] = value;
         }
 
         // 7xkk - ADD Vx, byte
-        private void Instruction7(uint opcode)
+        void Instruction7(ushort opcode)
         {
             // Add value to register
-            uint register = (opcode & 0x0F00) >> 8;
-            byte value = (byte)(opcode & 0x00FF);
+            byte register = X(opcode);
+            byte value = NN(opcode);
             V[register] += value;
         }
 
@@ -173,49 +180,51 @@ namespace Chip8
         // 8xy6 - SHR Vx {, Vy }
         // 8xy7 - SUBN Vx, Vy
         // 8xyE - SHL Vx {, Vy }
-        private void Instruction8(uint opcode)
+        void Instruction8(ushort opcode)
         {
             throw new NotImplementedException();
         }
 
         // 9xy0 - SNE Vx, Vy
-        private void Instruction9(uint opcode)
+        void Instruction9(ushort opcode)
         {
             throw new NotImplementedException();
         }
 
         // Annn - LD I, addr
-        private void InstructionA(uint opcode)
+        void InstructionA(ushort opcode)
         {
             // Set index register I
-            I = opcode & 0x0FFF;
+            I = NNN(opcode);
         }
 
         // Bnnn - JP V0, addr
-        private void InstructionB(uint opcode)
+        void InstructionB(ushort opcode)
         {
             throw new NotImplementedException();
         }
 
         // Cxkk - RND Vx, byte
-        private void InstructionC(uint opcode)
+        void InstructionC(ushort opcode)
         {
             throw new NotImplementedException();
         }
 
         // Dxyn - DRW Vx, Vy, nibble
-        private void InstructionD(uint opcode)
+        void InstructionD(ushort opcode)
         {
-            // _display/draw
+            // _screen/draw
             _requiresRedraw = true;
-            uint x = V[opcode & 0x0F00];
-            uint y = V[opcode & 0x00F0];
-            uint n = opcode & 0x000F;
+            byte x = V[X(opcode)];
+            byte y = V[Y(opcode)];
+            byte n = N(opcode);
+
+
         }
 
         // Ex9E - SKP Vx
         // ExA1 - SKNP Vx
-        private void InstructionE(uint opcode)
+        void InstructionE(ushort opcode)
         {
             throw new NotImplementedException();
         }
@@ -229,7 +238,7 @@ namespace Chip8
         // Fx33 - LD B, Vx
         // Fx55 - LD[I], Vx
         // Fx65 - LD Vx, [I]
-        private void InstructionF(uint opcode)
+        void InstructionF(ushort opcode)
         {
             throw new NotImplementedException();
         }
