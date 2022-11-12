@@ -49,15 +49,15 @@ namespace Chip8
 
         bool _requiresRedraw;
 
-        bool[] _screen = new bool[64 * 32];
+        bool[,] _screen = new bool[64,32];
 
         readonly Stopwatch _stopwatch = new Stopwatch();
 
         readonly Action<ushort>[] _instructions;
 
-        readonly Action<bool[]> _drawScreen;
+        readonly Action<bool[,]> _drawScreen;
 
-        public Chip8Emulator(Action<bool[]> drawScreen)
+        public Chip8Emulator(Action<bool[,]> drawScreen)
         {
             Array.Copy(Font, 0, Memory, FontMemory, Font.Length);
             _instructions = new Action<ushort>[]
@@ -107,7 +107,7 @@ namespace Chip8
             if (opcode == 0x00E0)
             {
                 // Clear Screen
-                _screen = new bool[64 * 32];
+                _screen = new bool[64,32];
                 _requiresRedraw = true;
             }
             else if (opcode == 0x00EE)
@@ -214,12 +214,32 @@ namespace Chip8
         void InstructionD(ushort opcode)
         {
             // _screen/draw
+            byte x = (byte)(V[X(opcode)] % 64);
+            byte y = (byte)(V[Y(opcode)] % 32);
+            byte height = N(opcode);
+            V[0xF] = 0;
+
+            for (byte row = 0; row < height; row++)
+            {
+                byte rowData = Memory[I + row];
+                int py = (y + row) % 32;
+
+                for (byte col = 0; col != 8; col++)
+                {
+                    int px = (x + col) % 64;
+
+                    bool oldPixel = _screen[px, py];
+                    bool spritePixel = ((rowData >> (7 - col)) & 1) == 1;
+                    if(spritePixel)
+                    {
+                        if (oldPixel)
+                            V[0xF] = 1;
+
+                        _screen[px, py] = !oldPixel;
+                    }
+                }
+            }
             _requiresRedraw = true;
-            byte x = V[X(opcode)];
-            byte y = V[Y(opcode)];
-            byte n = N(opcode);
-
-
         }
 
         // Ex9E - SKP Vx

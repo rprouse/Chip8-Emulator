@@ -6,16 +6,18 @@ var chip8 = new Chip8Emulator(DrawScreen);
 chip8.LoadRom(@"..\..\..\..\roms\IBM Logo.ch8");
 chip8.Run();
 
-void DrawScreen(bool[] display)
+void DrawScreen(bool[,] screen)
 {
-    Console.SetCursorPosition(0, 0);
+    Console.WriteLine();
+    Console.WriteLine("__________________________________________________________________");
     for(int y = 0; y < 32; y++)
     {
+        Console.Write('|');
         for(int x = 0; x < 64; x++)
         {
-            Console.Write(display[y * 32 + x] ? '#' : ' ');
+            Console.Write(screen[x,y] ? '#' : '.');
         }
-        Console.WriteLine();
+        Console.WriteLine('|');
     }
-    Console.WriteLine();
+    Console.WriteLine("------------------------------------------------------------------");
 }
