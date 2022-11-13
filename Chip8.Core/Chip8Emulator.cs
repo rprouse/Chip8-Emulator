@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace Chip8
+namespace Chip8.Core
 {
     public class Chip8Emulator
     {
