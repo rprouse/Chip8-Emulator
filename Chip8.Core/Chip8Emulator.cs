@@ -4,6 +4,9 @@ namespace Chip8.Core
 {
     public class Chip8Emulator
     {
+        public const int ScreenWidth = 64;
+        public const int ScreenHeight = 32;
+
         const uint FontMemory = 0x50;
         const uint ProgramMemory = 0x200;
 
@@ -29,15 +32,13 @@ namespace Chip8.Core
 
         public bool RequiresRedraw { get; private set; }
 
-        public bool[,] Screen { get; private set; } = new bool[64,32];
+        public bool[,] Screen { get; private set; } = new bool[ScreenWidth, ScreenHeight];
 
         readonly Stopwatch _stopwatch = new Stopwatch();
 
         readonly Action<OpCode>[] _instructions;
 
-        readonly Action<bool[,]> _drawScreen;
-
-        public Chip8Emulator(Action<bool[,]> drawScreen)
+        public Chip8Emulator()
         {
             Array.Copy(Font.Default, 0, Memory, FontMemory, Font.Default.Length);
             _instructions = new Action<OpCode>[]
@@ -47,7 +48,6 @@ namespace Chip8.Core
                 Instruction8, Instruction9, InstructionA, InstructionB,
                 InstructionC, InstructionD, InstructionE, InstructionF
             };
-            _drawScreen = drawScreen;
         }
 
         public void LoadRom(string filename)
@@ -59,17 +59,11 @@ namespace Chip8.Core
             Array.Copy(rom, 0, Memory, ProgramMemory, rom.Length);
         }
 
-        public void Run()
+        public void Step()
         {
-            while (true)
-            {
-                RequiresRedraw = false;
-                OpCode opcode = new OpCode((ushort)(Memory[PC++] << 8 | Memory[PC++]));
-                _instructions[opcode.Instruction](opcode);
-
-                if (RequiresRedraw)
-                    _drawScreen(Screen);
-            }
+            RequiresRedraw = false;
+            OpCode opcode = new OpCode((ushort)(Memory[PC++] << 8 | Memory[PC++]));
+            _instructions[opcode.Instruction](opcode);
         }
 
         // 00E0 - CLS
@@ -80,7 +74,7 @@ namespace Chip8.Core
             if (opcode.Data == 0x00E0)
             {
                 // Clear Screen
-                Screen = new bool[64,32];
+                Screen = new bool[ScreenWidth, ScreenHeight];
                 RequiresRedraw = true;
             }
             else if (opcode.Data == 0x00EE)
@@ -187,23 +181,23 @@ namespace Chip8.Core
         void InstructionD(OpCode opcode)
         {
             // Screen/draw
-            byte x = (byte)(V[opcode.X] % 64);
-            byte y = (byte)(V[opcode.Y] % 32);
+            byte x = (byte)(V[opcode.X] % ScreenWidth);
+            byte y = (byte)(V[opcode.Y] % ScreenHeight);
             byte height = opcode.N;
             V[0xF] = 0;
 
             for (byte row = 0; row < height; row++)
             {
                 byte rowData = Memory[I + row];
-                int py = (y + row) % 32;
+                int py = (y + row) % ScreenHeight;
 
                 for (byte col = 0; col != 8; col++)
                 {
-                    int px = (x + col) % 64;
+                    int px = (x + col) % ScreenWidth;
 
                     bool oldPixel = Screen[px, py];
                     bool spritePixel = ((rowData >> (7 - col)) & 1) == 1;
-                    if(spritePixel)
+                    if (spritePixel)
                     {
                         if (oldPixel)
                             V[0xF] = 1;

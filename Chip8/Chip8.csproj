@@ -5,7 +5,12 @@
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Silk.NET.SDL" Version="2.16.0" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Chip8.Core\Chip8.Core.csproj" />
