@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Chip8.Core;
 using Silk.NET.Maths;
 using Silk.NET.SDL;
@@ -7,6 +8,7 @@ Console.Clear();
 const int PixelSize = 10;
 const int ScreenWidth = Chip8Emulator.ScreenWidth * PixelSize;
 const int ScreenHeight = Chip8Emulator.ScreenHeight * PixelSize;
+const int InstructionsPerSecond = 700;
 
 var chip8 = new Chip8Emulator();
 chip8.LoadRom(@"..\..\..\..\roms\IBM Logo.ch8");
@@ -41,6 +43,7 @@ unsafe
 
     bool quit = false;
     Event e = new Event();
+    uint time = sdl.GetTicks(); // Time in ms since initialization
     while (!quit)
     {
         // Check for SDL events
@@ -62,12 +65,19 @@ unsafe
             }
         }
 
-        // Step the Chip-8 emulator
-        chip8.Step();
+        // Slow down the Chip-8
+        uint now = sdl.GetTicks();
+        if (now - time > 1000 / InstructionsPerSecond)
+        {
+            time = now;
 
-        // Redraw screen if necessary
-        if (chip8.RequiresRedraw)
-            DrawScreen();
+            // Step the Chip-8 emulator
+            chip8.Step();
+
+            // Redraw screen if necessary
+            if (chip8.RequiresRedraw)
+                DrawScreen();
+        }
     }
 
     sdl.FreeSurface(surface);
