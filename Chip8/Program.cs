@@ -65,11 +65,12 @@ unsafe
         // Step the Chip-8 emulator
         chip8.Step();
 
-        // Redraw if necessary
+        // Redraw screen if necessary
         if (chip8.RequiresRedraw)
             DrawScreen();
     }
 
+    sdl.FreeSurface(surface);
     sdl.DestroyWindow(window);
     sdl.Quit();
     return 0;

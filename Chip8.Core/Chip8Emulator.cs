@@ -34,7 +34,7 @@ namespace Chip8.Core
 
         public bool[,] Screen { get; private set; } = new bool[ScreenWidth, ScreenHeight];
 
-        readonly Stopwatch _stopwatch = new Stopwatch();
+        readonly Stopwatch _stopwatch;
 
         readonly Action<OpCode>[] _instructions;
 
@@ -48,6 +48,7 @@ namespace Chip8.Core
                 Instruction8, Instruction9, InstructionA, InstructionB,
                 InstructionC, InstructionD, InstructionE, InstructionF
             };
+            _stopwatch = Stopwatch.StartNew();
         }
 
         public void LoadRom(string filename)
@@ -64,6 +65,14 @@ namespace Chip8.Core
             RequiresRedraw = false;
             OpCode opcode = new OpCode((ushort)(Memory[PC++] << 8 | Memory[PC++]));
             _instructions[opcode.Instruction](opcode);
+
+            // Decrement timers. Technically, this should happen every 16.66 MS.
+            if (_stopwatch.ElapsedMilliseconds > 16)
+            {
+                if (DelayTimer > 0) DelayTimer--;
+                if (SoundTimer > 0) SoundTimer--;
+                _stopwatch.Restart();
+            }
         }
 
         // 00E0 - CLS
