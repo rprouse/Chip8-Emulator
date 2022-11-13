@@ -2,7 +2,6 @@ using System.Diagnostics;
 
 namespace Chip8.Core
 {
-
     public class Chip8Emulator
     {
         const uint FontMemory = 0x50;
@@ -28,9 +27,9 @@ namespace Chip8.Core
         /// </summary>
         public byte[] V { get; } = new byte[16];
 
-        bool _requiresRedraw;
+        public bool RequiresRedraw { get; private set; }
 
-        bool[,] _screen = new bool[64,32];
+        public bool[,] Screen { get; private set; } = new bool[64,32];
 
         readonly Stopwatch _stopwatch = new Stopwatch();
 
@@ -64,12 +63,12 @@ namespace Chip8.Core
         {
             while (true)
             {
-                _requiresRedraw = false;
+                RequiresRedraw = false;
                 OpCode opcode = new OpCode((ushort)(Memory[PC++] << 8 | Memory[PC++]));
                 _instructions[opcode.Instruction](opcode);
 
-                if (_requiresRedraw)
-                    _drawScreen(_screen);
+                if (RequiresRedraw)
+                    _drawScreen(Screen);
             }
         }
 
@@ -81,8 +80,8 @@ namespace Chip8.Core
             if (opcode.Data == 0x00E0)
             {
                 // Clear Screen
-                _screen = new bool[64,32];
-                _requiresRedraw = true;
+                Screen = new bool[64,32];
+                RequiresRedraw = true;
             }
             else if (opcode.Data == 0x00EE)
             {
@@ -187,7 +186,7 @@ namespace Chip8.Core
         // Dxyn - DRW Vx, Vy, nibble
         void InstructionD(OpCode opcode)
         {
-            // _screen/draw
+            // Screen/draw
             byte x = (byte)(V[opcode.X] % 64);
             byte y = (byte)(V[opcode.Y] % 32);
             byte height = opcode.N;
@@ -202,18 +201,18 @@ namespace Chip8.Core
                 {
                     int px = (x + col) % 64;
 
-                    bool oldPixel = _screen[px, py];
+                    bool oldPixel = Screen[px, py];
                     bool spritePixel = ((rowData >> (7 - col)) & 1) == 1;
                     if(spritePixel)
                     {
                         if (oldPixel)
                             V[0xF] = 1;
 
-                        _screen[px, py] = !oldPixel;
+                        Screen[px, py] = !oldPixel;
                     }
                 }
             }
-            _requiresRedraw = true;
+            RequiresRedraw = true;
         }
 
         // Ex9E - SKP Vx
