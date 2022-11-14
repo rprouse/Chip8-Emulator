@@ -65,8 +65,14 @@ namespace Chip8.Core
             Array.Copy(rom, 0, Memory, ProgramMemory, rom.Length);
         }
 
-        public void Step(byte? key)
+        /// <summary>
+        /// Executes one instruction
+        /// </summary>
+        /// <param name="key">Any key that is currently pressed</param>
+        /// <returns>True if a beep should be played.</returns>
+        public bool Step(byte? key)
         {
+            _currentKey = key;
             RequiresRedraw = false;
             OpCode opcode = new OpCode((ushort)(Memory[PC++] << 8 | Memory[PC++]));
             _instructions[opcode.Instruction](opcode);
@@ -79,6 +85,7 @@ namespace Chip8.Core
                 _stopwatch.Restart();
             }
             _currentKey = null;
+            return SoundTimer > 0;
         }
 
         // 00E0 - CLS

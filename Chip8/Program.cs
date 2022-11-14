@@ -11,7 +11,7 @@ const int ScreenHeight = Chip8Emulator.ScreenHeight * PixelSize;
 const int InstructionsPerSecond = 700;
 
 var chip8 = new Chip8Emulator();
-chip8.LoadRom(@"..\..\..\..\roms\bc_test.ch8");
+chip8.LoadRom(@"..\..\..\..\roms\Keypad Test [Hap, 2006].ch8");
 
 unsafe
 {
@@ -48,7 +48,6 @@ unsafe
     while (!quit)
     {
         // Check for SDL events
-        key = null;
         while (sdl.PollEvent(ref e) != 0)
         {
             switch ((EventType)e.Type)
@@ -69,11 +68,14 @@ unsafe
             time = now;
 
             // Step the Chip-8 emulator
-            chip8.Step(key);
+            if (chip8.Step(key))
+                Console.Beep();
 
             // Redraw screen if necessary
             if (chip8.RequiresRedraw)
                 DrawScreen();
+
+            key = null;
         }
     }
 
@@ -106,9 +108,6 @@ static unsafe byte? GetKeyPress(Event e)
     byte? key = null;
     switch ((KeyCode)e.Key.Keysym.Sym)
     {
-        case KeyCode.K0:
-            key = 0x0;
-            break;
         case KeyCode.K1:
             key = 0x1;
             break;
