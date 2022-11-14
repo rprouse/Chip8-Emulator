@@ -1,3 +1,6 @@
+#define ModernShiftBehaviour            // Use the modern Chip-8 behaviour for 8XY6 and 8XYE
+#define OriginalJumpOffsetBehaviour     // Use the original BNNN jump with offset behaviour
+
 using System.Diagnostics;
 
 namespace Chip8.Core
@@ -7,8 +10,8 @@ namespace Chip8.Core
         public const int ScreenWidth = 64;
         public const int ScreenHeight = 32;
 
-        const uint FontMemory = 0x50;
-        const uint ProgramMemory = 0x200;
+        const ushort FontMemory = 0x50;
+        const ushort ProgramMemory = 0x200;
 
         public byte[] Memory { get; } = new byte[4096];
 
@@ -29,6 +32,8 @@ namespace Chip8.Core
         /// Registers V0 to VF
         /// </summary>
         public byte[] V { get; } = new byte[16];
+
+        byte? _currentKey;
 
         public bool RequiresRedraw { get; private set; }
 
@@ -60,7 +65,7 @@ namespace Chip8.Core
             Array.Copy(rom, 0, Memory, ProgramMemory, rom.Length);
         }
 
-        public void Step()
+        public void Step(byte? key)
         {
             RequiresRedraw = false;
             OpCode opcode = new OpCode((ushort)(Memory[PC++] << 8 | Memory[PC++]));
@@ -73,6 +78,7 @@ namespace Chip8.Core
                 if (SoundTimer > 0) SoundTimer--;
                 _stopwatch.Restart();
             }
+            _currentKey = null;
         }
 
         // 00E0 - CLS
@@ -89,7 +95,7 @@ namespace Chip8.Core
             else if (opcode.Data == 0x00EE)
             {
                 // Return
-                throw new NotImplementedException();
+                PC = Stack.Pop();
             }
             else
             {
@@ -101,50 +107,47 @@ namespace Chip8.Core
         // 1nnn - JP addr
         void Instruction1(OpCode opcode)
         {
-            // Jump
             PC = opcode.NNN;
         }
 
         // 2nnn - CALL addr
         void Instruction2(OpCode opcode)
         {
-            throw new NotImplementedException();
+            Stack.Push(PC);
+            PC = opcode.NNN;
         }
 
         // 3xkk - SE Vx, byte
         void Instruction3(OpCode opcode)
         {
-            throw new NotImplementedException();
+            if (V[opcode.X] == opcode.NN)
+                PC += 2;
         }
 
         // 4xkk - SNE Vx, byte
         void Instruction4(OpCode opcode)
         {
-            throw new NotImplementedException();
+            if (V[opcode.X] != opcode.NN)
+                PC += 2;
         }
 
         // 5xy0 - SE Vx, Vy
         void Instruction5(OpCode opcode)
         {
-            throw new NotImplementedException();
+            if (V[opcode.X] == V[opcode.Y])
+                PC += 2;
         }
 
         // 6xkk - LD Vx, byte
         void Instruction6(OpCode opcode)
         {
-            // Set register
-            byte register = opcode.X;
-            byte value = opcode.NN;
-            V[register] = value;
+            V[opcode.X] = opcode.NN;
         }
 
         // 7xkk - ADD Vx, byte
         void Instruction7(OpCode opcode)
         {
-            // Add value to register
-            byte register = opcode.X;
-            byte value = opcode.NN;
-            V[register] += value;
+            V[opcode.X] += opcode.NN;
         }
 
         // 8xy0 - LD Vx, Vy
@@ -158,32 +161,78 @@ namespace Chip8.Core
         // 8xyE - SHL Vx {, Vy }
         void Instruction8(OpCode opcode)
         {
-            throw new NotImplementedException();
+            switch (opcode.N)
+            {
+                case 0x0:   // Set
+                    V[opcode.X] = V[opcode.Y];
+                    break;
+                case 0x1:   // Binary OR
+                    V[opcode.X] |= V[opcode.Y];
+                    break;
+                case 0x2:   // Binary AND
+                    V[opcode.X] &= V[opcode.Y];
+                    break;
+                case 0x3:   // Binary XOR
+                    V[opcode.X] ^= V[opcode.Y];
+                    break;
+                case 0x4:   // Add
+                    if ((int)V[opcode.X] + (int)V[opcode.Y] > 0xFF) V[0xF] = 1;
+                    V[opcode.X] += V[opcode.Y];
+                    break;
+                case 0x5:   // VX = VX - VY
+                    if (V[opcode.X] > V[opcode.Y]) V[0xF] = 1;
+                    V[opcode.X] -= V[opcode.Y];
+                    break;
+                case 0x6:   // Right shift
+#if !ModernShiftBehaviour
+                    V[opcode.X] = V[opcode.Y};
+#endif
+                    if ((V[opcode.X] & 0x01) > 0) V[0xF] = 1;
+                    V[opcode.X] = (byte)(V[opcode.X] >> 1);
+                    break;
+                case 0x7:   // VX = VY - VX
+                    if (V[opcode.Y] > V[opcode.X]) V[0xF] = 1;
+                    V[opcode.X] = (byte)(V[opcode.Y] - V[opcode.X]);
+                    break;
+                case 0xE:   // Left shift
+#if !ModernShiftBehaviour
+                    V[opcode.X] = V[opcode.Y};
+#endif
+                    if ((V[opcode.X] & 0x80) > 0) V[0xF] = 1;
+                    V[opcode.X] = (byte)(V[opcode.X] << 1);
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
         }
 
         // 9xy0 - SNE Vx, Vy
         void Instruction9(OpCode opcode)
         {
-            throw new NotImplementedException();
+            if (V[opcode.X] != V[opcode.Y])
+                PC += 2;
         }
 
         // Annn - LD I, addr
         void InstructionA(OpCode opcode)
         {
-            // Set index register I
             I = opcode.NNN;
         }
 
         // Bnnn - JP V0, addr
         void InstructionB(OpCode opcode)
         {
-            throw new NotImplementedException();
+#if OriginalJumpOffsetBehaviour
+            PC = (ushort)(V[0] + opcode.NNN);
+#else
+            PC = (ushort)(V[opcode.X] + opcode.NNN);
+#endif
         }
 
         // Cxkk - RND Vx, byte
         void InstructionC(OpCode opcode)
         {
-            throw new NotImplementedException();
+            V[opcode.X] &= (byte)Random.Shared.Next(256);
         }
 
         // Dxyn - DRW Vx, Vy, nibble
@@ -222,7 +271,21 @@ namespace Chip8.Core
         // ExA1 - SKNP Vx
         void InstructionE(OpCode opcode)
         {
-            throw new NotImplementedException();
+            switch (opcode.NN)
+            {
+                case 0x9E:
+                    if (_currentKey.HasValue && 
+                        _currentKey.Value == opcode.X)
+                        PC += 2;
+                    break;
+                case 0xA1:
+                    if (!_currentKey.HasValue || 
+                        _currentKey.Value != opcode.X)
+                        PC += 2;
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
         }
 
         // Fx07 - LD Vx, DT
@@ -236,7 +299,53 @@ namespace Chip8.Core
         // Fx65 - LD Vx, [I]
         void InstructionF(OpCode opcode)
         {
-            throw new NotImplementedException();
+            switch(opcode.NN)
+            {
+                case 0x07:  // Set delay timer
+                    V[opcode.X] = DelayTimer;
+                    break;
+                case 0x0A:  // Get key
+                    if (_currentKey.HasValue)
+                        V[opcode.X] = _currentKey.Value;
+                    else
+                        PC -= 2;
+                    break;
+                case 0x15:  // Read delay timer
+                    DelayTimer = V[opcode.X];
+                    break;
+                case 0x18:  // Set sound timer
+                    SoundTimer = V[opcode.X];
+                    break;
+                case 0x1E:  // Add to index register
+                    if ((int)I + (int)V[opcode.X] > 0xFF) V[0xF] = 1;
+                    I += V[opcode.X];
+                    break;
+                case 0x29:  // Font character
+                    I = (ushort)(FontMemory + V[opcode.X] * 5);
+                    break;
+                case 0x33: // Binary-coded decimal conversion
+                    byte x = V[opcode.X];
+                    Memory[I + 2] = (byte)(x % 10);
+                    x /= 10;
+                    Memory[I + 1] = (byte)(x % 10);
+                    x /= 10;
+                    Memory[I] = (byte)(x % 10);
+                    break;
+                case 0x55: // Store memory
+                    for (int i = 0; i < opcode.X; i++)
+                    {
+                        Memory[I + i] = V[i];
+                    }
+                    break;
+                case 0x65: // Load memory
+                    for (int i = 0; i < opcode.X; i++)
+                    {
+                        V[i] = Memory[I + i];
+                    }
+                    break;
+                default:
+                    throw new NotImplementedException("Unknown FXNN instruction");
+            }
         }
     }
 }

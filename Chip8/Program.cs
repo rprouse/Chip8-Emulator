@@ -11,7 +11,7 @@ const int ScreenHeight = Chip8Emulator.ScreenHeight * PixelSize;
 const int InstructionsPerSecond = 700;
 
 var chip8 = new Chip8Emulator();
-chip8.LoadRom(@"..\..\..\..\roms\IBM Logo.ch8");
+chip8.LoadRom(@"..\..\..\..\roms\bc_test.ch8");
 
 unsafe
 {
@@ -42,11 +42,13 @@ unsafe
     sdl.UpdateWindowSurface(window);
 
     bool quit = false;
+    byte? key = null;
     Event e = new Event();
     uint time = sdl.GetTicks(); // Time in ms since initialization
     while (!quit)
     {
         // Check for SDL events
+        key = null;
         while (sdl.PollEvent(ref e) != 0)
         {
             switch ((EventType)e.Type)
@@ -55,12 +57,7 @@ unsafe
                     quit = true;
                     break;
                 case EventType.Keydown:
-                    switch ((KeyCode)e.Key.Keysym.Sym)
-                    {
-                        case KeyCode.KQ:
-                            quit = true;
-                            break;
-                    }
+                    key = GetKeyPress(e);
                     break;
             }
         }
@@ -72,7 +69,7 @@ unsafe
             time = now;
 
             // Step the Chip-8 emulator
-            chip8.Step();
+            chip8.Step(key);
 
             // Redraw screen if necessary
             if (chip8.RequiresRedraw)
@@ -102,6 +99,66 @@ unsafe
         Rectangle<int> pixel = new Rectangle<int>(x * PixelSize, y * PixelSize, PixelSize, PixelSize);
         sdl.FillRect(surface, ref pixel, pixelOn ? on : off);
     }
+}
+
+static unsafe byte? GetKeyPress(Event e)
+{
+    byte? key = null;
+    switch ((KeyCode)e.Key.Keysym.Sym)
+    {
+        case KeyCode.K0:
+            key = 0x0;
+            break;
+        case KeyCode.K1:
+            key = 0x1;
+            break;
+        case KeyCode.K2:
+            key = 0x2;
+            break;
+        case KeyCode.K3:
+            key = 0x3;
+            break;
+        case KeyCode.K4:
+            key = 0xC;
+            break;
+        case KeyCode.KQ:
+            key = 0x4;
+            break;
+        case KeyCode.KW:
+            key = 0x5;
+            break;
+        case KeyCode.KE:
+            key = 0x6;
+            break;
+        case KeyCode.KR:
+            key = 0xD;
+            break;
+        case KeyCode.KA:
+            key = 0x7;
+            break;
+        case KeyCode.KS:
+            key = 0x8;
+            break;
+        case KeyCode.KD:
+            key = 0x9;
+            break;
+        case KeyCode.KF:
+            key = 0xE;
+            break;
+        case KeyCode.KZ:
+            key = 0xA;
+            break;
+        case KeyCode.KX:
+            key = 0x0;
+            break;
+        case KeyCode.KC:
+            key = 0xB;
+            break;
+        case KeyCode.KV:
+            key = 0xF;
+            break;
+    }
+    return key;
 }
 
 #if false
