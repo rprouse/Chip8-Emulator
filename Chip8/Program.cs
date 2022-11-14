@@ -11,7 +11,7 @@ const int ScreenHeight = Chip8Emulator.ScreenHeight * PixelSize;
 const int InstructionsPerSecond = 700;
 
 var chip8 = new Chip8Emulator();
-chip8.LoadRom(@"..\..\..\..\roms\Keypad Test [Hap, 2006].ch8");
+chip8.LoadRom(@"..\..\..\..\roms\Chip8 emulator Logo [Garstyciuks].ch8");
 
 unsafe
 {
