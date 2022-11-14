@@ -176,34 +176,39 @@ namespace Chip8.Core
                     V[opcode.X] ^= V[opcode.Y];
                     break;
                 case 0x4:   // Add
-                    if ((int)V[opcode.X] + (int)V[opcode.Y] > 0xFF) V[0xF] = 1;
+                    SetVFlags((int)V[opcode.X] + (int)V[opcode.Y] > 0xFF);
                     V[opcode.X] += V[opcode.Y];
                     break;
                 case 0x5:   // VX = VX - VY
-                    if (V[opcode.X] > V[opcode.Y]) V[0xF] = 1;
+                    SetVFlags(V[opcode.X] > V[opcode.Y]);
                     V[opcode.X] -= V[opcode.Y];
                     break;
                 case 0x6:   // Right shift
 #if !ModernShiftBehaviour
                     V[opcode.X] = V[opcode.Y};
 #endif
-                    if ((V[opcode.X] & 0x01) > 0) V[0xF] = 1;
+                    SetVFlags((V[opcode.X] & 0x01) > 0);
                     V[opcode.X] = (byte)(V[opcode.X] >> 1);
                     break;
                 case 0x7:   // VX = VY - VX
-                    if (V[opcode.Y] > V[opcode.X]) V[0xF] = 1;
+                    SetVFlags(V[opcode.Y] > V[opcode.X]);
                     V[opcode.X] = (byte)(V[opcode.Y] - V[opcode.X]);
                     break;
                 case 0xE:   // Left shift
 #if !ModernShiftBehaviour
                     V[opcode.X] = V[opcode.Y};
 #endif
-                    if ((V[opcode.X] & 0x80) > 0) V[0xF] = 1;
+                    SetVFlags((V[opcode.X] & 0x80) > 0);
                     V[opcode.X] = (byte)(V[opcode.X] << 1);
                     break;
                 default:
                     throw new NotImplementedException();
             }
+        }
+
+        void SetVFlags(bool b)
+        {
+            V[0xF] = (byte)(b ? 1 : 0);
         }
 
         // 9xy0 - SNE Vx, Vy
@@ -317,7 +322,7 @@ namespace Chip8.Core
                     SoundTimer = V[opcode.X];
                     break;
                 case 0x1E:  // Add to index register
-                    if ((int)I + (int)V[opcode.X] > 0xFF) V[0xF] = 1;
+                    SetVFlags((int)I + (int)V[opcode.X] > 0xFF);
                     I += V[opcode.X];
                     break;
                 case 0x29:  // Font character
@@ -332,13 +337,13 @@ namespace Chip8.Core
                     Memory[I] = (byte)(x % 10);
                     break;
                 case 0x55: // Store memory
-                    for (int i = 0; i < opcode.X; i++)
+                    for (int i = 0; i <= opcode.X; i++)
                     {
                         Memory[I + i] = V[i];
                     }
                     break;
                 case 0x65: // Load memory
-                    for (int i = 0; i < opcode.X; i++)
+                    for (int i = 0; i <= opcode.X; i++)
                     {
                         V[i] = Memory[I + i];
                     }
