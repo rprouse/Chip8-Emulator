@@ -1,0 +1,8 @@
+CHIP-8 test suite
+
+A single ROM image containing six distinct tests that will aid you in
+developing your own CHIP-8, SCHIP or XO-CHIP interpreter (or "emulator").
+
+Under GPLv3 license from
+
+https://github.com/Timendus/chip8-test-suite
