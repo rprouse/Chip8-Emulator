@@ -1,24 +1,35 @@
-#define ModernShiftBehaviour            // Use the modern Chip-8 behaviour for 8XY6 and 8XYE
-#define OriginalJumpOffsetBehaviour     // Use the original BNNN jump with offset behaviour
-
 using System.Diagnostics;
 
 namespace Chip8.Core
 {
+    public class Config
+    {
+        /// <summary>
+        /// Use the modern Chip-8 behaviour for 8XY6 and 8XYE
+        /// </summary>
+        public bool ModernShiftBehaviour { get; set; } = true;
+
+        /// <summary>
+        /// Use the original BNNN jump with offset behaviour. If set
+        /// to false, uses the Super CHIP8 behaviour.
+        /// </summary>
+        public bool OriginalJumpOffsetBehaviour { get; set; } = true;
+    }
+
     public class Chip8Emulator
     {
         public const int ScreenWidth = 64;
         public const int ScreenHeight = 32;
 
-        const ushort FontMemory = 0x50;
-        const ushort ProgramMemory = 0x200;
+        public const ushort FontMemory = 0x50;
+        public const ushort ProgramMemory = 0x200;
 
         public byte[] Memory { get; } = new byte[4096];
 
         /// <summary>
         /// Program counter
         /// </summary>
-        public ushort PC { get; set; } = 0x200;
+        public ushort PC { get; set; } = ProgramMemory;
 
         public ushort I { get; set; }
 
@@ -32,6 +43,14 @@ namespace Chip8.Core
         /// Registers V0 to VF
         /// </summary>
         public byte[] V { get; } = new byte[16];
+
+        public byte VF
+        {
+            get => V[0x0F];
+            set => V[0x0F] = value;
+        }
+
+        public Config Config { get; } = new Config();
 
         byte? _currentKey;
 
@@ -191,9 +210,8 @@ namespace Chip8.Core
                     V[opcode.X] -= V[opcode.Y];
                     break;
                 case 0x6:   // Right shift
-#if !ModernShiftBehaviour
-                    V[opcode.X] = V[opcode.Y};
-#endif
+                    if (!Config.ModernShiftBehaviour)
+                        V[opcode.X] = V[opcode.Y];
                     SetVFlags((V[opcode.X] & 0x01) > 0);
                     V[opcode.X] = (byte)(V[opcode.X] >> 1);
                     break;
@@ -202,9 +220,8 @@ namespace Chip8.Core
                     V[opcode.X] = (byte)(V[opcode.Y] - V[opcode.X]);
                     break;
                 case 0xE:   // Left shift
-#if !ModernShiftBehaviour
-                    V[opcode.X] = V[opcode.Y};
-#endif
+                    if (!Config.ModernShiftBehaviour)
+                        V[opcode.X] = V[opcode.Y];
                     SetVFlags((V[opcode.X] & 0x80) > 0);
                     V[opcode.X] = (byte)(V[opcode.X] << 1);
                     break;
@@ -215,7 +232,7 @@ namespace Chip8.Core
 
         void SetVFlags(bool b)
         {
-            V[0xF] = (byte)(b ? 1 : 0);
+            VF = (byte)(b ? 1 : 0);
         }
 
         // 9xy0 - SNE Vx, Vy
@@ -234,17 +251,16 @@ namespace Chip8.Core
         // Bnnn - JP V0, addr
         void InstructionB(OpCode opcode)
         {
-#if OriginalJumpOffsetBehaviour
-            PC = (ushort)(V[0] + opcode.NNN);
-#else
-            PC = (ushort)(V[opcode.X] + opcode.NNN);
-#endif
+            if (Config.OriginalJumpOffsetBehaviour)
+                PC = (ushort)(V[0] + opcode.NNN);
+            else
+                PC = (ushort)(V[opcode.X] + opcode.NNN);
         }
 
         // Cxkk - RND Vx, byte
         void InstructionC(OpCode opcode)
         {
-            V[opcode.X] &= (byte)Random.Shared.Next(256);
+            V[opcode.X] = (byte)(Random.Shared.Next(256) & opcode.NN);
         }
 
         // Dxyn - DRW Vx, Vy, nibble
@@ -254,7 +270,7 @@ namespace Chip8.Core
             byte x = (byte)(V[opcode.X] % ScreenWidth);
             byte y = (byte)(V[opcode.Y] % ScreenHeight);
             byte height = opcode.N;
-            V[0xF] = 0;
+            VF = 0;
 
             for (byte row = 0; row < height; row++)
             {
@@ -270,7 +286,7 @@ namespace Chip8.Core
                     if (spritePixel)
                     {
                         if (oldPixel)
-                            V[0xF] = 1;
+                            VF = 1;
 
                         Screen[px, py] = !oldPixel;
                     }
