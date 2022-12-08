@@ -15,7 +15,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - name: 💾 Checkout source code
+      uses: actions/checkout@v3
     - name: 🛠️ Setup .NET
       uses: actions/setup-dotnet@v3
       with:
@@ -24,5 +25,5 @@ jobs:
       run: dotnet restore
     - name: 🔨 Build
       run: dotnet build --no-restore
-    - name: ✅ Test
+    - name: 🧪 Test
       run: dotnet test --no-build --verbosity normal

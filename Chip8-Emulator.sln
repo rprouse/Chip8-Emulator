@@ -51,7 +51,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "roms", "roms", "{158F4F0F-B
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chip8", "Chip8\Chip8.csproj", "{6F2E372C-6517-44D6-9621-D6E9813244E0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chip8.Tests", "Chip8.Tests\Chip8.Tests.csproj", "{EE38E34E-41DD-47F9-B96E-FF50BFCFA8CA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chip8.Tests", "Chip8.Tests\Chip8.Tests.csproj", "{EE38E34E-41DD-47F9-B96E-FF50BFCFA8CA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{425006CE-8690-4D4F-9FDF-CD6740CB8EC0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Workflows", "Workflows", "{CB6C7A8E-B4AB-4CC6-8562-77F2FB2164F7}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\dotnet.yml = .github\workflows\dotnet.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -74,6 +81,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{CB6C7A8E-B4AB-4CC6-8562-77F2FB2164F7} = {425006CE-8690-4D4F-9FDF-CD6740CB8EC0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7E3AC357-DB17-47BF-A001-ADD29DD23765}
