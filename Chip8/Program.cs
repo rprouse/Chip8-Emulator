@@ -11,7 +11,7 @@ const int ScreenHeight = Chip8Emulator.ScreenHeight * PixelSize;
 const int InstructionsPerSecond = 700;
 
 var chip8 = new Chip8Emulator();
-chip8.LoadRom(@"..\..\..\..\roms\chip8-test-suite.ch8");
+chip8.LoadRom(@"..\..\..\..\roms\IBM Logo.ch8");
 
 unsafe
 {
