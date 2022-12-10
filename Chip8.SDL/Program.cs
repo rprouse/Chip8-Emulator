@@ -1,5 +1,3 @@
-using System.Diagnostics;
-using System.Text;
 using Chip8.Core;
 using Chip8.SDL;
 
@@ -14,7 +12,6 @@ using (var console = new SdlConsole())
     chip8.Run();
 }
 return 0;
-
 
 #if false
 string DebugScreen(bool[,] screen)
