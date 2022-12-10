@@ -345,8 +345,9 @@ namespace Chip8.Core
                     SoundTimer = V[opcode.X];
                     break;
                 case 0x1E:  // Add to index register
-                    SetVFlags((int)I + (int)V[opcode.X] > 0xFF);
+                    SetVFlags((int)I + (int)V[opcode.X] > 0x0FFF);
                     I += V[opcode.X];
+                    if (I > 0x0FFF) I %= 0x0FFF;
                     break;
                 case 0x29:  // Font character
                     I = (ushort)(FontMemory + V[opcode.X] * 5);

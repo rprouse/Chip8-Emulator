@@ -563,6 +563,171 @@ namespace Chip8.Tests
             _emulator.Screen[Chip8Emulator.ScreenWidth - 1, 0].Should().BeTrue();
         }
 
+        [TestCase(null, false)]
+        [TestCase(0x4, false)]
+        [TestCase(0xA, true)]
+        public void TestEX9E(byte? key, bool shouldSkip) // SKP Vx
+        {
+            LoadBytes(new byte[] { 0xEA, 0x9E });
+
+            _emulator.Step(key);
+
+            _emulator.PC.Should().Be((ushort)(shouldSkip ? 0x204 : 0x202));
+        }
+
+        [TestCase(null, true)]
+        [TestCase(0x4, true)]
+        [TestCase(0xA, false)]
+        public void TestEXA1(byte? key, bool shouldSkip) // SKNP Vx
+        {
+            LoadBytes(new byte[] { 0xEA, 0xA1 });
+
+            _emulator.Step(key);
+
+            _emulator.PC.Should().Be((ushort)(shouldSkip ? 0x204 : 0x202));
+        }
+
+        [Test]
+        public void TestFX07() // LD Vx, DT
+        {
+            LoadBytes(new byte[] { 0xF3, 0x07 });
+            _emulator.DelayTimer = 0xF0;
+
+            _emulator.Step(null);
+
+            _emulator.V[3].Should().Be(0xF0);
+        }
+
+        [Test]
+        public void TestFX15() // LD DT, Vx
+        {
+            LoadBytes(new byte[] { 0xF3, 0x15 });
+            _emulator.V[3] = 0xF0;
+
+            _emulator.Step(null);
+
+            _emulator.DelayTimer.Should().Be(0xF0);
+        }
+
+        [Test]
+        public void TestFX18() // LD ST, Vx
+        {
+            LoadBytes(new byte[] { 0xF3, 0x18 });
+            _emulator.V[3] = 0xF0;
+
+            _emulator.Step(null);
+
+            _emulator.SoundTimer.Should().Be(0xF0);
+        }
+
+        [Test]
+        public void TestFX1E() //  ADD I, Vx
+        {
+            LoadBytes(new byte[] { 0xF1, 0x1E });
+            _emulator.I = 0xFF0;
+            _emulator.V[1] = 3;
+
+            _emulator.Step(null);
+
+            _emulator.VF.Should().Be(0);
+            _emulator.I.Should().Be(0xFF3);
+        }
+
+        [Test]
+        public void TestFX1EWithOverflow() //  ADD I, Vx
+        {
+            LoadBytes(new byte[] { 0xF1, 0x1E });
+            _emulator.I = 0xFFF;
+            _emulator.V[1] = 3;
+
+            _emulator.Step(null);
+
+            _emulator.VF.Should().Be(1);
+            _emulator.I.Should().Be(0x3);
+        }
+
+        [TestCase(null, false)]
+        [TestCase(0x4, true)]
+        [TestCase(0xA, true)]
+        public void TestFX0A(byte? key, bool keyFound) // LD Vx, K
+        {
+            LoadBytes(new byte[] { 0xFA, 0x0A });
+
+            _emulator.Step(key);
+
+            _emulator.V[0xA].Should().Be((byte)(keyFound ? key.Value : 0));
+            _emulator.PC.Should().Be((ushort)(keyFound ? 0x202 : 0x200));
+        }
+
+        [Test]
+        public void TestFX29() //  LD F, Vx
+        {
+            LoadBytes(new byte[] { 0xF1, 0x29 });
+            _emulator.V[1] = 3;
+
+            _emulator.Step(null);
+
+            _emulator.I.Should().Be(Chip8Emulator.FontMemory + 15);
+        }
+
+        [TestCase(0, 0, 0, 0)]
+        [TestCase(1, 0, 0, 1)]
+        [TestCase(92, 0, 9, 2)]
+        [TestCase(156, 1, 5, 6)]
+        [TestCase(248, 2, 4, 8)]
+        [TestCase(170, 1, 7, 0)]
+        [TestCase(200, 2, 0, 0)]
+        public void TestFX33(byte number, byte d1, byte d2, byte d3) //  LD B, Vx
+        {
+            LoadBytes(new byte[] { 0xF1, 0x33 });
+            _emulator.V[1] = number;
+            _emulator.I = 0x300;
+
+            _emulator.Step(null);
+
+            _emulator.Memory[0x300].Should().Be(d1);
+            _emulator.Memory[0x301].Should().Be(d2);
+            _emulator.Memory[0x302].Should().Be(d3);
+        }
+
+        [Test]
+        public void TestFX55() //  LD[I], Vx
+        {
+            LoadBytes(new byte[] { 0xF2, 0x55 });
+            _emulator.V[0] = 1;
+            _emulator.V[1] = 2;
+            _emulator.V[2] = 3;
+            _emulator.V[3] = 4;
+            _emulator.I = 0x300;
+
+            _emulator.Step(null);
+
+            _emulator.I.Should().Be(0x300);
+            _emulator.Memory[0x300].Should().Be(1);
+            _emulator.Memory[0x301].Should().Be(2);
+            _emulator.Memory[0x302].Should().Be(3);
+            _emulator.Memory[0x303].Should().Be(0);
+        }
+
+        [Test]
+        public void TestFX65() //  LD Vx, [I]
+        {
+            LoadBytes(new byte[] { 0xF2, 0x65 });
+            _emulator.Memory[0x300] = 1;
+            _emulator.Memory[0x301] = 2;
+            _emulator.Memory[0x302] = 3;
+            _emulator.Memory[0x303] = 4;
+            _emulator.I = 0x300;
+
+            _emulator.Step(null);
+
+            _emulator.I.Should().Be(0x300);
+            _emulator.V[0].Should().Be(1);
+            _emulator.V[1].Should().Be(2);
+            _emulator.V[2].Should().Be(3);
+            _emulator.V[3].Should().Be(0);
+        }
+
         string DebugScreen(bool[,] screen)
         {
             var builder = new StringBuilder();
