@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Text;
 using Chip8.Core;
 using Silk.NET.Maths;
 using Silk.NET.SDL;
@@ -11,7 +12,7 @@ const int ScreenHeight = Chip8Emulator.ScreenHeight * PixelSize;
 const int InstructionsPerSecond = 700;
 
 var chip8 = new Chip8Emulator();
-chip8.LoadRom(@"..\..\..\..\roms\IBM Logo.ch8");
+chip8.LoadRom(@"..\..\..\..\roms\Chip8 Picture.ch8");
 
 unsafe
 {
@@ -161,19 +162,22 @@ static unsafe byte? GetKeyPress(Event e)
 }
 
 #if false
-void DrawScreen(bool[,] screen)
+string DebugScreen(bool[,] screen)
 {
-    Console.WriteLine();
-    Console.WriteLine("┌────────────────────────────────────────────────────────────────┐");
+    var builder = new StringBuilder();
+    builder.AppendLine();
+    builder.AppendLine("┌────────────────────────────────────────────────────────────────┐");
     for (int y = 0; y < 32; y++)
     {
-        Console.Write('│');
+        builder.Append('│');
         for (int x = 0; x < 64; x++)
         {
-            Console.Write(screen[x, y] ? '█' : ' ');
+            builder.Append(screen[x, y] ? '█' : ' ');
         }
-        Console.WriteLine('│');
+        builder.Append('│');
+        builder.AppendLine();
     }
-    Console.WriteLine("└────────────────────────────────────────────────────────────────┘");
+    builder.AppendLine("└────────────────────────────────────────────────────────────────┘");
+    return builder.ToString();
 }
 #endif

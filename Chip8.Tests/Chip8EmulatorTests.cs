@@ -1,3 +1,4 @@
+using System.Text;
 using FluentAssertions;
 
 namespace Chip8.Tests
@@ -450,6 +451,135 @@ namespace Chip8.Tests
                 _emulator.V[0xA].Should().BeLessOrEqualTo(0x0F);
             }
             foundNonZero.Should().BeTrue();
+        }
+
+        [Test]
+        public void TestDXYN() // DRW Vx, Vy, N
+        {
+            LoadBytes(new byte[] { 0xD8, 0x93 });
+            _emulator.V[8] = 1;
+            _emulator.V[9] = 5;
+            _emulator.Memory[0x300] = 0b10101010;
+            _emulator.Memory[0x301] = 0b01010101;
+            _emulator.Memory[0x302] = 0xFF;
+            _emulator.I = 0x300;
+
+            _emulator.Step(null);
+
+            _emulator.VF.Should().Be(0);
+            _emulator.RequiresRedraw.Should().BeTrue();
+            _emulator.Screen[1, 5].Should().BeTrue();
+            _emulator.Screen[2, 5].Should().BeFalse();
+            _emulator.Screen[1, 6].Should().BeFalse();
+            _emulator.Screen[2, 6].Should().BeTrue();
+            _emulator.Screen[1, 7].Should().BeTrue();
+            _emulator.Screen[2, 7].Should().BeTrue();
+            _emulator.Screen[7, 5].Should().BeTrue();
+            _emulator.Screen[8, 5].Should().BeFalse();
+            _emulator.Screen[7, 6].Should().BeFalse();
+            _emulator.Screen[8, 6].Should().BeTrue();
+            _emulator.Screen[7, 7].Should().BeTrue();
+            _emulator.Screen[8, 7].Should().BeTrue();
+        }
+
+        [Test]
+        public void TestDXYNFlipsPixelsAndSetsVF() // DRW Vx, Vy, N
+        {
+            LoadBytes(new byte[] { 0xD8, 0x91 });
+            _emulator.V[8] = 0;
+            _emulator.V[9] = 0;
+            _emulator.Memory[0x300] = 0b11001100;
+            _emulator.Memory[0x301] = 0b00110011;
+            _emulator.I = 0x300;
+            _emulator.Screen[0, 0] = true;
+            _emulator.Screen[3, 1] = true; 
+
+            _emulator.Step(null);
+
+            _emulator.VF.Should().Be(1);
+            _emulator.RequiresRedraw.Should().BeTrue();
+            _emulator.Screen[0, 0].Should().BeFalse();
+            _emulator.Screen[2, 1].Should().BeFalse();
+            _emulator.Screen[1, 0].Should().BeTrue();
+            _emulator.Screen[3, 1].Should().BeTrue();
+        }
+
+        [Test]
+        public void TestDXYNStartXShouldWrap() // DRW Vx, Vy, N
+        {
+            LoadBytes(new byte[] { 0xD8, 0x91 });
+            _emulator.V[8] = Chip8Emulator.ScreenWidth;
+            _emulator.V[9] = 0;
+            _emulator.Memory[0x300] = 0xFF;
+            _emulator.I = 0x300;
+
+            _emulator.Step(null);
+
+            //TestContext.WriteLine(DebugScreen(_emulator.Screen));
+
+            _emulator.VF.Should().Be(0);
+            _emulator.RequiresRedraw.Should().BeTrue();
+            _emulator.Screen[0, 0].Should().BeTrue();
+            _emulator.Screen[7, 0].Should().BeTrue();
+            _emulator.Screen[8, 0].Should().BeFalse();
+        }
+
+        [Test]
+        public void TestDXYNStartYShouldWrap() // DRW Vx, Vy, N
+        {
+            LoadBytes(new byte[] { 0xD8, 0x91 });
+            _emulator.V[8] = 0;
+            _emulator.V[9] = Chip8Emulator.ScreenHeight;
+            _emulator.Memory[0x300] = 0xFF;
+            _emulator.I = 0x300;
+
+            _emulator.Step(null);
+
+            //TestContext.WriteLine(DebugScreen(_emulator.Screen));
+
+            _emulator.VF.Should().Be(0);
+            _emulator.RequiresRedraw.Should().BeTrue();
+            _emulator.Screen[0, 0].Should().BeTrue();
+            _emulator.Screen[7, 0].Should().BeTrue();
+            _emulator.Screen[8, 0].Should().BeFalse();
+        }
+
+        [Test]
+        public void TestDXYNEndXShouldNotWrap() // DRW Vx, Vy, N
+        {
+            LoadBytes(new byte[] { 0xD8, 0x91 });
+            _emulator.V[8] = Chip8Emulator.ScreenWidth - 1;
+            _emulator.V[9] = 0;
+            _emulator.Memory[0x300] = 0xFF;
+            _emulator.I = 0x300;
+
+            _emulator.Step(null);
+
+            //TestContext.WriteLine(DebugScreen(_emulator.Screen));
+
+            _emulator.VF.Should().Be(0);
+            _emulator.RequiresRedraw.Should().BeTrue();
+            _emulator.Screen[0, 0].Should().BeFalse();
+            _emulator.Screen[Chip8Emulator.ScreenWidth - 1, 0].Should().BeTrue();
+        }
+
+        string DebugScreen(bool[,] screen)
+        {
+            var builder = new StringBuilder();
+            builder.AppendLine();
+            builder.AppendLine("┌────────────────────────────────────────────────────────────────┐");
+            for (int y = 0; y < 32; y++)
+            {
+                builder.Append('│');
+                for (int x = 0; x < 64; x++)
+                {
+                    builder.Append(screen[x, y] ? '#' : ' ');
+                }
+                builder.Append('│');
+                builder.AppendLine();
+            }
+            builder.AppendLine("└────────────────────────────────────────────────────────────────┘");
+            return builder.ToString();
         }
     }
 }

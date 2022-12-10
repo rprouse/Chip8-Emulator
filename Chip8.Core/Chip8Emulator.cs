@@ -272,14 +272,14 @@ namespace Chip8.Core
             byte height = opcode.N;
             VF = 0;
 
-            for (byte row = 0; row < height; row++)
+            for (byte row = 0; row < height && y + row < ScreenHeight; row++)
             {
                 byte rowData = Memory[I + row];
-                int py = (y + row) % ScreenHeight;
+                int py = y + row;
 
-                for (byte col = 0; col != 8; col++)
+                for (byte col = 0; col != 8 && x + col < ScreenWidth; col++)
                 {
-                    int px = (x + col) % ScreenWidth;
+                    int px = x + col;
 
                     bool oldPixel = Screen[px, py];
                     bool spritePixel = ((rowData >> (7 - col)) & 1) == 1;
