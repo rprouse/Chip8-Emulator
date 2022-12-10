@@ -2,20 +2,6 @@ using System.Diagnostics;
 
 namespace Chip8.Core
 {
-    public class Config
-    {
-        /// <summary>
-        /// Use the modern Chip-8 behaviour for 8XY6 and 8XYE
-        /// </summary>
-        public bool ModernShiftBehaviour { get; set; } = true;
-
-        /// <summary>
-        /// Use the original BNNN jump with offset behaviour. If set
-        /// to false, uses the Super CHIP8 behaviour.
-        /// </summary>
-        public bool OriginalJumpOffsetBehaviour { get; set; } = true;
-    }
-
     public class Chip8Emulator
     {
         public const int ScreenWidth = 64;
@@ -210,7 +196,7 @@ namespace Chip8.Core
                     V[opcode.X] -= V[opcode.Y];
                     break;
                 case 0x6:   // Right shift
-                    if (!Config.ModernShiftBehaviour)
+                    if (Config.OriginalShiftBehaviour)
                         V[opcode.X] = V[opcode.Y];
                     SetVFlags((V[opcode.X] & 0x01) > 0);
                     V[opcode.X] = (byte)(V[opcode.X] >> 1);
@@ -220,7 +206,7 @@ namespace Chip8.Core
                     V[opcode.X] = (byte)(V[opcode.Y] - V[opcode.X]);
                     break;
                 case 0xE:   // Left shift
-                    if (!Config.ModernShiftBehaviour)
+                    if (Config.OriginalShiftBehaviour)
                         V[opcode.X] = V[opcode.Y];
                     SetVFlags((V[opcode.X] & 0x80) > 0);
                     V[opcode.X] = (byte)(V[opcode.X] << 1);
@@ -365,12 +351,16 @@ namespace Chip8.Core
                     {
                         Memory[I + i] = V[i];
                     }
+                    if (Config.OriginalStoreLoadMemoryBehaviour)
+                        I += (ushort)(opcode.X + 1);
                     break;
                 case 0x65: // Load memory
                     for (int i = 0; i <= opcode.X; i++)
                     {
                         V[i] = Memory[I + i];
                     }
+                    if (Config.OriginalStoreLoadMemoryBehaviour)
+                        I += (ushort)(opcode.X + 1);
                     break;
                 default:
                     throw new NotImplementedException("Unknown FXNN instruction");

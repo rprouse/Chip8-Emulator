@@ -282,7 +282,7 @@ namespace Chip8.Tests
         public void Test8XY6OriginalBehaviour() // Right Shift
         {
             LoadBytes(new byte[] { 0x85, 0x66 });
-            _emulator.Config.ModernShiftBehaviour = false;
+            _emulator.Config.OriginalShiftBehaviour = true;
             _emulator.V[5] = 0b00000000;
             _emulator.V[6] = 0b10101010;
 
@@ -296,7 +296,7 @@ namespace Chip8.Tests
         public void Test8XY6WithCarryOriginalBehaviour() // Right Shift
         {
             LoadBytes(new byte[] { 0x85, 0x66 });
-            _emulator.Config.ModernShiftBehaviour = false;
+            _emulator.Config.OriginalShiftBehaviour = true;
             _emulator.V[5] = 0b00000000;
             _emulator.V[6] = 0b01010101;
 
@@ -365,7 +365,7 @@ namespace Chip8.Tests
         public void Test8XYEOriginalBehaviour() // Left Shift
         {
             LoadBytes(new byte[] { 0x85, 0x6E });
-            _emulator.Config.ModernShiftBehaviour = false;
+            _emulator.Config.OriginalShiftBehaviour = true;
             _emulator.V[5] = 0b00000000;
             _emulator.V[6] = 0b01010101;
 
@@ -379,7 +379,7 @@ namespace Chip8.Tests
         public void Test8XYEWithCarryOriginalBehaviour() // Left Shift
         {
             LoadBytes(new byte[] { 0x85, 0x6E });
-            _emulator.Config.ModernShiftBehaviour = false;
+            _emulator.Config.OriginalShiftBehaviour = true;
             _emulator.V[5] = 0b00000000;
             _emulator.V[6] = 0b10101010;
 
@@ -690,8 +690,9 @@ namespace Chip8.Tests
             _emulator.Memory[0x302].Should().Be(d3);
         }
 
-        [Test]
-        public void TestFX55() //  LD[I], Vx
+        [TestCase(true)]
+        [TestCase(false)]
+        public void TestFX55(bool originalBehaviour) //  LD[I], Vx
         {
             LoadBytes(new byte[] { 0xF2, 0x55 });
             _emulator.V[0] = 1;
@@ -699,18 +700,20 @@ namespace Chip8.Tests
             _emulator.V[2] = 3;
             _emulator.V[3] = 4;
             _emulator.I = 0x300;
+            _emulator.Config.OriginalStoreLoadMemoryBehaviour = originalBehaviour;
 
             _emulator.Step(null);
 
-            _emulator.I.Should().Be(0x300);
+            _emulator.I.Should().Be((ushort)(originalBehaviour ? 0x303 : 0x300));
             _emulator.Memory[0x300].Should().Be(1);
             _emulator.Memory[0x301].Should().Be(2);
             _emulator.Memory[0x302].Should().Be(3);
             _emulator.Memory[0x303].Should().Be(0);
         }
 
-        [Test]
-        public void TestFX65() //  LD Vx, [I]
+        [TestCase(true)]
+        [TestCase(false)]
+        public void TestFX65(bool originalBehaviour) //  LD Vx, [I]
         {
             LoadBytes(new byte[] { 0xF2, 0x65 });
             _emulator.Memory[0x300] = 1;
@@ -718,10 +721,11 @@ namespace Chip8.Tests
             _emulator.Memory[0x302] = 3;
             _emulator.Memory[0x303] = 4;
             _emulator.I = 0x300;
+            _emulator.Config.OriginalStoreLoadMemoryBehaviour = originalBehaviour;
 
             _emulator.Step(null);
 
-            _emulator.I.Should().Be(0x300);
+            _emulator.I.Should().Be((ushort)(originalBehaviour ? 0x303 : 0x300));
             _emulator.V[0].Should().Be(1);
             _emulator.V[1].Should().Be(2);
             _emulator.V[2].Should().Be(3);
