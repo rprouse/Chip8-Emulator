@@ -26,7 +26,7 @@ namespace Chip8.Tests
             _emulator.Screen[0, 0] = true;
             _emulator.Screen[Chip8Emulator.ScreenWidth - 1, Chip8Emulator.ScreenHeight - 1] = true;
 
-            _emulator.Step(null);
+            _emulator.SingleStep(null);
 
             _emulator.Screen[0, 0].Should().BeFalse();
             _emulator.Screen[Chip8Emulator.ScreenWidth - 1, Chip8Emulator.ScreenHeight - 1].Should().BeFalse();
@@ -38,7 +38,7 @@ namespace Chip8.Tests
             LoadBytes(new byte[] { 0x00, 0xEE });
             _emulator.Stack.Push(0x0399);
 
-            _emulator.Step(null);
+            _emulator.SingleStep(null);
 
             _emulator.PC.Should().Be(0x0399);
             _emulator.Stack.Count.Should().Be(0);
@@ -49,7 +49,7 @@ namespace Chip8.Tests
         {
             LoadBytes(new byte[] { 0x03, 0x99 });
 
-            _emulator.Invoking(e => e.Step(null))
+            _emulator.Invoking(e => e.SingleStep(null))
                 .Should().Throw<NotImplementedException>();
         }
 
@@ -58,7 +58,7 @@ namespace Chip8.Tests
         {
             LoadBytes(new byte[] { 0x13, 0x99 });
 
-            _emulator.Step(null);
+            _emulator.SingleStep(null);
 
             _emulator.PC.Should().Be(0x0399);
         }
@@ -68,7 +68,7 @@ namespace Chip8.Tests
         {
             LoadBytes(new byte[] { 0x23, 0x99 });
 
-            _emulator.Step(null);
+            _emulator.SingleStep(null);
 
             _emulator.PC.Should().Be(0x0399);
             _emulator.Stack.Count.Should().Be(1);
@@ -82,7 +82,7 @@ namespace Chip8.Tests
             LoadBytes(new byte[] { 0x30, 0x99 });
             _emulator.V[0] = register;
 
-            _emulator.Step(null);
+            _emulator.SingleStep(null);
 
             _emulator.PC.Should().Be((ushort)expected);
         }
@@ -94,7 +94,7 @@ namespace Chip8.Tests
             LoadBytes(new byte[] { 0x40, 0x99 });
             _emulator.V[0] = register;
 
-            _emulator.Step(null);
+            _emulator.SingleStep(null);
 
             _emulator.PC.Should().Be((ushort)expected);
         }
@@ -107,7 +107,7 @@ namespace Chip8.Tests
             _emulator.V[0] = register;
             _emulator.V[1] = 0x99;
 
-            _emulator.Step(null);
+            _emulator.SingleStep(null);
 
             _emulator.PC.Should().Be((ushort)expected);
         }
@@ -118,7 +118,7 @@ namespace Chip8.Tests
             LoadBytes(new byte[] { 0x62, 0x23 });
             _emulator.V[2] = 0x00;
 
-            _emulator.Step(null);
+            _emulator.SingleStep(null);
 
             _emulator.V[2].Should().Be(0x23);
         }
@@ -129,7 +129,7 @@ namespace Chip8.Tests
             LoadBytes(new byte[] { 0x72, 0x23 });
             _emulator.V[2] = 0x12;
 
-            _emulator.Step(null);
+            _emulator.SingleStep(null);
 
             _emulator.V[2].Should().Be(0x35);
         }
@@ -140,7 +140,7 @@ namespace Chip8.Tests
             LoadBytes(new byte[] { 0x73, 0x01 });
             _emulator.V[3] = 0xFF;
 
-            _emulator.Step(null);
+            _emulator.SingleStep(null);
 
             _emulator.V[3].Should().Be(0x00);
             _emulator.VF.Should().Be(0x00);
@@ -152,7 +152,7 @@ namespace Chip8.Tests
             LoadBytes(new byte[] { 0x83, 0x40 });
             _emulator.V[4] = 0xFF;
 
-            _emulator.Step(null);
+            _emulator.SingleStep(null);
 
             _emulator.V[3].Should().Be(0xFF);
         }
@@ -164,7 +164,7 @@ namespace Chip8.Tests
             _emulator.V[3] = 0b10000101;
             _emulator.V[4] = 0b10101010;
 
-            _emulator.Step(null);
+            _emulator.SingleStep(null);
 
             _emulator.V[3].Should().Be(0b10101111);
             _emulator.V[4].Should().Be(0b10101010);
@@ -177,7 +177,7 @@ namespace Chip8.Tests
             _emulator.V[3] = 0b10000101;
             _emulator.V[4] = 0b10101011;
 
-            _emulator.Step(null);
+            _emulator.SingleStep(null);
 
             _emulator.V[3].Should().Be(0b10000001);
             _emulator.V[4].Should().Be(0b10101011);
@@ -190,7 +190,7 @@ namespace Chip8.Tests
             _emulator.V[3] = 0b10000101;
             _emulator.V[4] = 0b10101011;
 
-            _emulator.Step(null);
+            _emulator.SingleStep(null);
 
             _emulator.V[3].Should().Be(0b00101110);
             _emulator.V[4].Should().Be(0b10101011);
@@ -203,7 +203,7 @@ namespace Chip8.Tests
             _emulator.V[5] = 0x0F;
             _emulator.V[6] = 0x39;
 
-            _emulator.Step(null);
+            _emulator.SingleStep(null);
 
             _emulator.V[5].Should().Be(0x48);
             _emulator.V[6].Should().Be(0x39);
@@ -217,7 +217,7 @@ namespace Chip8.Tests
             _emulator.V[5] = 0xFF;
             _emulator.V[6] = 0x39;
 
-            _emulator.Step(null);
+            _emulator.SingleStep(null);
 
             _emulator.V[5].Should().Be(0x38);
             _emulator.V[6].Should().Be(0x39);
@@ -231,7 +231,7 @@ namespace Chip8.Tests
             _emulator.V[5] = 0xFF;
             _emulator.V[6] = 0x39;
 
-            _emulator.Step(null);
+            _emulator.SingleStep(null);
 
             _emulator.V[5].Should().Be(0xC6);
             _emulator.V[6].Should().Be(0x39);
@@ -245,7 +245,7 @@ namespace Chip8.Tests
             _emulator.V[5] = 0x38;
             _emulator.V[6] = 0x39;
 
-            _emulator.Step(null);
+            _emulator.SingleStep(null);
 
             _emulator.V[5].Should().Be(0xFF);
             _emulator.V[6].Should().Be(0x39);
@@ -259,7 +259,7 @@ namespace Chip8.Tests
             _emulator.V[5] = 0b10101010;
             _emulator.V[6] = 0x39;
 
-            _emulator.Step(null);
+            _emulator.SingleStep(null);
             _emulator.V[5].Should().Be(0b01010101);
             _emulator.V[6].Should().Be(0x39);
             _emulator.VF.Should().Be(0);
@@ -272,7 +272,7 @@ namespace Chip8.Tests
             _emulator.V[5] = 0b01010101;
             _emulator.V[6] = 0x39;
 
-            _emulator.Step(null);
+            _emulator.SingleStep(null);
             _emulator.V[5].Should().Be(0b00101010);
             _emulator.V[6].Should().Be(0x39);
             _emulator.VF.Should().Be(1);
@@ -286,7 +286,7 @@ namespace Chip8.Tests
             _emulator.V[5] = 0b00000000;
             _emulator.V[6] = 0b10101010;
 
-            _emulator.Step(null);
+            _emulator.SingleStep(null);
             _emulator.V[5].Should().Be(0b01010101);
             _emulator.V[6].Should().Be(0b10101010);
             _emulator.VF.Should().Be(0);
@@ -300,7 +300,7 @@ namespace Chip8.Tests
             _emulator.V[5] = 0b00000000;
             _emulator.V[6] = 0b01010101;
 
-            _emulator.Step(null);
+            _emulator.SingleStep(null);
             _emulator.V[5].Should().Be(0b00101010);
             _emulator.V[6].Should().Be(0b01010101);
             _emulator.VF.Should().Be(1);
@@ -313,7 +313,7 @@ namespace Chip8.Tests
             _emulator.V[5] = 0x39;
             _emulator.V[6] = 0xFF;
 
-            _emulator.Step(null);
+            _emulator.SingleStep(null);
 
             _emulator.V[5].Should().Be(0xC6);
             _emulator.V[6].Should().Be(0xFF);
@@ -327,7 +327,7 @@ namespace Chip8.Tests
             _emulator.V[5] = 0x39;
             _emulator.V[6] = 0x38;
 
-            _emulator.Step(null);
+            _emulator.SingleStep(null);
 
             _emulator.V[5].Should().Be(0xFF);
             _emulator.V[6].Should().Be(0x38);
@@ -342,7 +342,7 @@ namespace Chip8.Tests
             _emulator.V[5] = 0b01010101;
             _emulator.V[6] = 0x39;
 
-            _emulator.Step(null);
+            _emulator.SingleStep(null);
             _emulator.V[5].Should().Be(0b10101010);
             _emulator.V[6].Should().Be(0x39);
             _emulator.VF.Should().Be(0);
@@ -355,7 +355,7 @@ namespace Chip8.Tests
             _emulator.V[5] = 0b10101010;
             _emulator.V[6] = 0x39;
 
-            _emulator.Step(null);
+            _emulator.SingleStep(null);
             _emulator.V[5].Should().Be(0b01010100);
             _emulator.V[6].Should().Be(0x39);
             _emulator.VF.Should().Be(1);
@@ -369,7 +369,7 @@ namespace Chip8.Tests
             _emulator.V[5] = 0b00000000;
             _emulator.V[6] = 0b01010101;
 
-            _emulator.Step(null);
+            _emulator.SingleStep(null);
             _emulator.V[5].Should().Be(0b10101010);
             _emulator.V[6].Should().Be(0b01010101);
             _emulator.VF.Should().Be(0);
@@ -383,7 +383,7 @@ namespace Chip8.Tests
             _emulator.V[5] = 0b00000000;
             _emulator.V[6] = 0b10101010;
 
-            _emulator.Step(null);
+            _emulator.SingleStep(null);
             _emulator.V[5].Should().Be(0b01010100);
             _emulator.V[6].Should().Be(0b10101010);
             _emulator.VF.Should().Be(1);
@@ -397,7 +397,7 @@ namespace Chip8.Tests
             _emulator.V[0] = register;
             _emulator.V[1] = 0x99;
 
-            _emulator.Step(null);
+            _emulator.SingleStep(null);
 
             _emulator.PC.Should().Be((ushort)expected);
         }
@@ -407,7 +407,7 @@ namespace Chip8.Tests
         {
             LoadBytes(new byte[] { 0xA1, 0x23 });
 
-            _emulator.Step(null);
+            _emulator.SingleStep(null);
 
             _emulator.I.Should().Be(0x0123);
         }
@@ -419,7 +419,7 @@ namespace Chip8.Tests
             _emulator.V[0] = 0x05;
             _emulator.V[1] = 0x50;
 
-            _emulator.Step(null);
+            _emulator.SingleStep(null);
 
             _emulator.PC.Should().Be(0x0128);
         }
@@ -432,7 +432,7 @@ namespace Chip8.Tests
             _emulator.V[0] = 0x05;
             _emulator.V[1] = 0x50;
 
-            _emulator.Step(null);
+            _emulator.SingleStep(null);
 
             _emulator.PC.Should().Be(0x0173);
         }
@@ -446,7 +446,7 @@ namespace Chip8.Tests
             {
                 _emulator.V[0xA] = 0x00;
                 _emulator.PC = Chip8Emulator.ProgramMemory;
-                _emulator.Step(null);
+                _emulator.SingleStep(null);
                 if (_emulator.V[0xA] > 0) foundNonZero = true;
                 _emulator.V[0xA].Should().BeLessOrEqualTo(0x0F);
             }
@@ -464,7 +464,7 @@ namespace Chip8.Tests
             _emulator.Memory[0x302] = 0xFF;
             _emulator.I = 0x300;
 
-            _emulator.Step(null);
+            _emulator.SingleStep(null);
 
             _emulator.VF.Should().Be(0);
             _emulator.RequiresRedraw.Should().BeTrue();
@@ -494,7 +494,7 @@ namespace Chip8.Tests
             _emulator.Screen[0, 0] = true;
             _emulator.Screen[3, 1] = true; 
 
-            _emulator.Step(null);
+            _emulator.SingleStep(null);
 
             _emulator.VF.Should().Be(1);
             _emulator.RequiresRedraw.Should().BeTrue();
@@ -513,7 +513,7 @@ namespace Chip8.Tests
             _emulator.Memory[0x300] = 0xFF;
             _emulator.I = 0x300;
 
-            _emulator.Step(null);
+            _emulator.SingleStep(null);
 
             //TestContext.WriteLine(DebugScreen(_emulator.Screen));
 
@@ -533,7 +533,7 @@ namespace Chip8.Tests
             _emulator.Memory[0x300] = 0xFF;
             _emulator.I = 0x300;
 
-            _emulator.Step(null);
+            _emulator.SingleStep(null);
 
             //TestContext.WriteLine(DebugScreen(_emulator.Screen));
 
@@ -553,7 +553,7 @@ namespace Chip8.Tests
             _emulator.Memory[0x300] = 0xFF;
             _emulator.I = 0x300;
 
-            _emulator.Step(null);
+            _emulator.SingleStep(null);
 
             //TestContext.WriteLine(DebugScreen(_emulator.Screen));
 
@@ -570,7 +570,7 @@ namespace Chip8.Tests
         {
             LoadBytes(new byte[] { 0xEA, 0x9E });
 
-            _emulator.Step(key);
+            _emulator.SingleStep(key);
 
             _emulator.PC.Should().Be((ushort)(shouldSkip ? 0x204 : 0x202));
         }
@@ -582,7 +582,7 @@ namespace Chip8.Tests
         {
             LoadBytes(new byte[] { 0xEA, 0xA1 });
 
-            _emulator.Step(key);
+            _emulator.SingleStep(key);
 
             _emulator.PC.Should().Be((ushort)(shouldSkip ? 0x204 : 0x202));
         }
@@ -593,7 +593,7 @@ namespace Chip8.Tests
             LoadBytes(new byte[] { 0xF3, 0x07 });
             _emulator.DelayTimer = 0xF0;
 
-            _emulator.Step(null);
+            _emulator.SingleStep(null);
 
             _emulator.V[3].Should().Be(0xF0);
         }
@@ -604,7 +604,7 @@ namespace Chip8.Tests
             LoadBytes(new byte[] { 0xF3, 0x15 });
             _emulator.V[3] = 0xF0;
 
-            _emulator.Step(null);
+            _emulator.SingleStep(null);
 
             _emulator.DelayTimer.Should().Be(0xF0);
         }
@@ -615,7 +615,7 @@ namespace Chip8.Tests
             LoadBytes(new byte[] { 0xF3, 0x18 });
             _emulator.V[3] = 0xF0;
 
-            _emulator.Step(null);
+            _emulator.SingleStep(null);
 
             _emulator.SoundTimer.Should().Be(0xF0);
         }
@@ -627,7 +627,7 @@ namespace Chip8.Tests
             _emulator.I = 0xFF0;
             _emulator.V[1] = 3;
 
-            _emulator.Step(null);
+            _emulator.SingleStep(null);
 
             _emulator.VF.Should().Be(0);
             _emulator.I.Should().Be(0xFF3);
@@ -640,7 +640,7 @@ namespace Chip8.Tests
             _emulator.I = 0xFFF;
             _emulator.V[1] = 3;
 
-            _emulator.Step(null);
+            _emulator.SingleStep(null);
 
             _emulator.VF.Should().Be(1);
             _emulator.I.Should().Be(0x3);
@@ -653,9 +653,10 @@ namespace Chip8.Tests
         {
             LoadBytes(new byte[] { 0xFA, 0x0A });
 
-            _emulator.Step(key);
+            _emulator.SingleStep(key);
 
-            _emulator.V[0xA].Should().Be((byte)(keyFound ? key.Value : 0));
+            byte expected = (byte)(keyFound ? key ?? 0 : 0);
+            _emulator.V[0xA].Should().Be(expected);
             _emulator.PC.Should().Be((ushort)(keyFound ? 0x202 : 0x200));
         }
 
@@ -665,7 +666,7 @@ namespace Chip8.Tests
             LoadBytes(new byte[] { 0xF1, 0x29 });
             _emulator.V[1] = 3;
 
-            _emulator.Step(null);
+            _emulator.SingleStep(null);
 
             _emulator.I.Should().Be(Chip8Emulator.FontMemory + 15);
         }
@@ -683,7 +684,7 @@ namespace Chip8.Tests
             _emulator.V[1] = number;
             _emulator.I = 0x300;
 
-            _emulator.Step(null);
+            _emulator.SingleStep(null);
 
             _emulator.Memory[0x300].Should().Be(d1);
             _emulator.Memory[0x301].Should().Be(d2);
@@ -702,7 +703,7 @@ namespace Chip8.Tests
             _emulator.I = 0x300;
             _emulator.Config.OriginalStoreLoadMemoryBehaviour = originalBehaviour;
 
-            _emulator.Step(null);
+            _emulator.SingleStep(null);
 
             _emulator.I.Should().Be((ushort)(originalBehaviour ? 0x303 : 0x300));
             _emulator.Memory[0x300].Should().Be(1);
@@ -723,7 +724,7 @@ namespace Chip8.Tests
             _emulator.I = 0x300;
             _emulator.Config.OriginalStoreLoadMemoryBehaviour = originalBehaviour;
 
-            _emulator.Step(null);
+            _emulator.SingleStep(null);
 
             _emulator.I.Should().Be((ushort)(originalBehaviour ? 0x303 : 0x300));
             _emulator.V[0].Should().Be(1);

@@ -68,8 +68,8 @@ unsafe
         {
             time = now;
 
-            // Step the Chip-8 emulator
-            if (chip8.Step(key))
+            // SingleStep the Chip-8 emulator
+            if (chip8.SingleStep(key))
                 Console.Beep();
 
             // Redraw screen if necessary

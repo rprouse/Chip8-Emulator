@@ -38,26 +38,18 @@ namespace Chip8.Core
 
         public Config Config { get; } = new Config();
 
-        byte? _currentKey;
-
         public bool RequiresRedraw { get; private set; }
 
         public bool[,] Screen { get; private set; } = new bool[ScreenWidth, ScreenHeight];
 
-        readonly Stopwatch _stopwatch;
+        readonly Instructions _instructions;
 
-        readonly Action<OpCode>[] _instructions;
+        readonly Stopwatch _stopwatch;
 
         public Chip8Emulator()
         {
             Array.Copy(Font.Default, 0, Memory, FontMemory, Font.Default.Length);
-            _instructions = new Action<OpCode>[]
-            {
-                Instruction0, Instruction1, Instruction2, Instruction3,
-                Instruction4, Instruction5, Instruction6, Instruction7,
-                Instruction8, Instruction9, InstructionA, InstructionB,
-                InstructionC, InstructionD, InstructionE, InstructionF
-            };
+            _instructions = new Instructions(this);
             _stopwatch = Stopwatch.StartNew();
         }
 
@@ -75,12 +67,11 @@ namespace Chip8.Core
         /// </summary>
         /// <param name="key">Any key that is currently pressed</param>
         /// <returns>True if a beep should be played.</returns>
-        public bool Step(byte? key)
+        public bool SingleStep(byte? key)
         {
-            _currentKey = key;
             RequiresRedraw = false;
-            OpCode opcode = new OpCode((ushort)(Memory[PC++] << 8 | Memory[PC++]));
-            _instructions[opcode.Instruction](opcode);
+            var opcode = new OpCode((ushort)(Memory[PC++] << 8 | Memory[PC++]));
+            _instructions.Execute(opcode, key);
 
             // Decrement timers. Technically, this should happen every 16.66 MS.
             if (_stopwatch.ElapsedMilliseconds > 16)
@@ -89,282 +80,21 @@ namespace Chip8.Core
                 if (SoundTimer > 0) SoundTimer--;
                 _stopwatch.Restart();
             }
-            _currentKey = null;
             return SoundTimer > 0;
         }
 
-        // 00E0 - CLS
-        // 00EE - RET
-        // 0nnn - SYS addr
-        void Instruction0(OpCode opcode)
+        public void ClearScreen()
         {
-            if (opcode.Data == 0x00E0)
-            {
-                // Clear Screen
-                Screen = new bool[ScreenWidth, ScreenHeight];
-                RequiresRedraw = true;
-            }
-            else if (opcode.Data == 0x00EE)
-            {
-                // Return
-                PC = Stack.Pop();
-            }
-            else
-            {
-                // Call machine language subroutine
-                throw new NotImplementedException();
-            }
-        }
-
-        // 1nnn - JP addr
-        void Instruction1(OpCode opcode)
-        {
-            PC = opcode.NNN;
-        }
-
-        // 2nnn - CALL addr
-        void Instruction2(OpCode opcode)
-        {
-            Stack.Push(PC);
-            PC = opcode.NNN;
-        }
-
-        // 3xkk - SE Vx, byte
-        void Instruction3(OpCode opcode)
-        {
-            if (V[opcode.X] == opcode.NN)
-                PC += 2;
-        }
-
-        // 4xkk - SNE Vx, byte
-        void Instruction4(OpCode opcode)
-        {
-            if (V[opcode.X] != opcode.NN)
-                PC += 2;
-        }
-
-        // 5xy0 - SE Vx, Vy
-        void Instruction5(OpCode opcode)
-        {
-            if (V[opcode.X] == V[opcode.Y])
-                PC += 2;
-        }
-
-        // 6xkk - LD Vx, byte
-        void Instruction6(OpCode opcode)
-        {
-            V[opcode.X] = opcode.NN;
-        }
-
-        // 7xkk - ADD Vx, byte
-        void Instruction7(OpCode opcode)
-        {
-            V[opcode.X] += opcode.NN;
-        }
-
-        // 8xy0 - LD Vx, Vy
-        // 8xy1 - OR Vx, Vy
-        // 8xy2 - AND Vx, Vy
-        // 8xy3 - XOR Vx, Vy
-        // 8xy4 - ADD Vx, Vy
-        // 8xy5 - SUB Vx, Vy
-        // 8xy6 - SHR Vx {, Vy }
-        // 8xy7 - SUBN Vx, Vy
-        // 8xyE - SHL Vx {, Vy }
-        void Instruction8(OpCode opcode)
-        {
-            switch (opcode.N)
-            {
-                case 0x0:   // Set
-                    V[opcode.X] = V[opcode.Y];
-                    break;
-                case 0x1:   // Binary OR
-                    V[opcode.X] |= V[opcode.Y];
-                    break;
-                case 0x2:   // Binary AND
-                    V[opcode.X] &= V[opcode.Y];
-                    break;
-                case 0x3:   // Binary XOR
-                    V[opcode.X] ^= V[opcode.Y];
-                    break;
-                case 0x4:   // Add
-                    SetVFlags((int)V[opcode.X] + (int)V[opcode.Y] > 0xFF);
-                    V[opcode.X] += V[opcode.Y];
-                    break;
-                case 0x5:   // VX = VX - VY
-                    SetVFlags(V[opcode.X] > V[opcode.Y]);
-                    V[opcode.X] -= V[opcode.Y];
-                    break;
-                case 0x6:   // Right shift
-                    if (Config.OriginalShiftBehaviour)
-                        V[opcode.X] = V[opcode.Y];
-                    SetVFlags((V[opcode.X] & 0x01) > 0);
-                    V[opcode.X] = (byte)(V[opcode.X] >> 1);
-                    break;
-                case 0x7:   // VX = VY - VX
-                    SetVFlags(V[opcode.Y] > V[opcode.X]);
-                    V[opcode.X] = (byte)(V[opcode.Y] - V[opcode.X]);
-                    break;
-                case 0xE:   // Left shift
-                    if (Config.OriginalShiftBehaviour)
-                        V[opcode.X] = V[opcode.Y];
-                    SetVFlags((V[opcode.X] & 0x80) > 0);
-                    V[opcode.X] = (byte)(V[opcode.X] << 1);
-                    break;
-                default:
-                    throw new NotImplementedException();
-            }
-        }
-
-        void SetVFlags(bool b)
-        {
-            VF = (byte)(b ? 1 : 0);
-        }
-
-        // 9xy0 - SNE Vx, Vy
-        void Instruction9(OpCode opcode)
-        {
-            if (V[opcode.X] != V[opcode.Y])
-                PC += 2;
-        }
-
-        // Annn - LD I, addr
-        void InstructionA(OpCode opcode)
-        {
-            I = opcode.NNN;
-        }
-
-        // Bnnn - JP V0, addr
-        void InstructionB(OpCode opcode)
-        {
-            if (Config.OriginalJumpOffsetBehaviour)
-                PC = (ushort)(V[0] + opcode.NNN);
-            else
-                PC = (ushort)(V[opcode.X] + opcode.NNN);
-        }
-
-        // Cxkk - RND Vx, byte
-        void InstructionC(OpCode opcode)
-        {
-            V[opcode.X] = (byte)(Random.Shared.Next(256) & opcode.NN);
-        }
-
-        // Dxyn - DRW Vx, Vy, nibble
-        void InstructionD(OpCode opcode)
-        {
-            // Screen/draw
-            byte x = (byte)(V[opcode.X] % ScreenWidth);
-            byte y = (byte)(V[opcode.Y] % ScreenHeight);
-            byte height = opcode.N;
-            VF = 0;
-
-            for (byte row = 0; row < height && y + row < ScreenHeight; row++)
-            {
-                byte rowData = Memory[I + row];
-                int py = y + row;
-
-                for (byte col = 0; col != 8 && x + col < ScreenWidth; col++)
-                {
-                    int px = x + col;
-
-                    bool oldPixel = Screen[px, py];
-                    bool spritePixel = ((rowData >> (7 - col)) & 1) == 1;
-                    if (spritePixel)
-                    {
-                        if (oldPixel)
-                            VF = 1;
-
-                        Screen[px, py] = !oldPixel;
-                    }
-                }
-            }
+            Screen = new bool[ScreenWidth, ScreenHeight];
             RequiresRedraw = true;
         }
 
-        // Ex9E - SKP Vx
-        // ExA1 - SKNP Vx
-        void InstructionE(OpCode opcode)
-        {
-            switch (opcode.NN)
-            {
-                case 0x9E:
-                    if (_currentKey.HasValue && 
-                        _currentKey.Value == opcode.X)
-                        PC += 2;
-                    break;
-                case 0xA1:
-                    if (!_currentKey.HasValue || 
-                        _currentKey.Value != opcode.X)
-                        PC += 2;
-                    break;
-                default:
-                    throw new NotImplementedException();
-            }
-        }
+        public bool GetPixel(int x, int y) => Screen[x, y];
 
-        // Fx07 - LD Vx, DT
-        // Fx0A - LD Vx, K
-        // Fx15 - LD DT, Vx
-        // Fx18 - LD ST, Vx
-        // Fx1E - ADD I, Vx
-        // Fx29 - LD F, Vx
-        // Fx33 - LD B, Vx
-        // Fx55 - LD[I], Vx
-        // Fx65 - LD Vx, [I]
-        void InstructionF(OpCode opcode)
+        public void SetPixel(int x, int y, bool on)
         {
-            switch(opcode.NN)
-            {
-                case 0x07:  // Set delay timer
-                    V[opcode.X] = DelayTimer;
-                    break;
-                case 0x0A:  // Get key
-                    if (_currentKey.HasValue)
-                        V[opcode.X] = _currentKey.Value;
-                    else
-                        PC -= 2;
-                    break;
-                case 0x15:  // Read delay timer
-                    DelayTimer = V[opcode.X];
-                    break;
-                case 0x18:  // Set sound timer
-                    SoundTimer = V[opcode.X];
-                    break;
-                case 0x1E:  // Add to index register
-                    SetVFlags((int)I + (int)V[opcode.X] > 0x0FFF);
-                    I += V[opcode.X];
-                    if (I > 0x0FFF) I %= 0x0FFF;
-                    break;
-                case 0x29:  // Font character
-                    I = (ushort)(FontMemory + V[opcode.X] * 5);
-                    break;
-                case 0x33: // Binary-coded decimal conversion
-                    byte x = V[opcode.X];
-                    Memory[I + 2] = (byte)(x % 10);
-                    x /= 10;
-                    Memory[I + 1] = (byte)(x % 10);
-                    x /= 10;
-                    Memory[I] = (byte)(x % 10);
-                    break;
-                case 0x55: // Store memory
-                    for (int i = 0; i <= opcode.X; i++)
-                    {
-                        Memory[I + i] = V[i];
-                    }
-                    if (Config.OriginalStoreLoadMemoryBehaviour)
-                        I += (ushort)(opcode.X + 1);
-                    break;
-                case 0x65: // Load memory
-                    for (int i = 0; i <= opcode.X; i++)
-                    {
-                        V[i] = Memory[I + i];
-                    }
-                    if (Config.OriginalStoreLoadMemoryBehaviour)
-                        I += (ushort)(opcode.X + 1);
-                    break;
-                default:
-                    throw new NotImplementedException("Unknown FXNN instruction");
-            }
+            Screen[x, y] = on;
+            RequiresRedraw = true;
         }
     }
 }
