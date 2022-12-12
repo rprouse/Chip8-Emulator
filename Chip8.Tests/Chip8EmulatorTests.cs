@@ -8,10 +8,7 @@ public class Chip8EmulatorTests
     Chip8Emulator _emulator;
 
     [SetUp]
-    public void Setup()
-    {
-        _emulator = new Chip8Emulator(new NullConsole());
-    }
+    public void Setup() => _emulator = new Chip8Emulator(new NullConsole());
 
     private void LoadBytes(byte[] bytes)
     {

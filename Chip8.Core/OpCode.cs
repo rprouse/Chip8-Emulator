@@ -47,4 +47,7 @@ public class OpCode
     /// The last three nibbles of the opcode
     /// </summary>
     public ushort NNN { get; }
+
+    public override string ToString() =>
+        $"0x{Data:X4}";
 }
