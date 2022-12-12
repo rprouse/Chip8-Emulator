@@ -45,7 +45,7 @@ public class Instructions
         else
         {
             // Call machine language subroutine
-            throw new NotImplementedException();
+            throw new NotImplementedException("SYS calls are unsupported");
         }
     }
 
