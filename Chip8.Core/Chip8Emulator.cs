@@ -12,7 +12,7 @@ public class Chip8Emulator
 
     const int InstructionsPerSecond = 700;
 
-    public byte[] Memory { get; } = new byte[0x1000];
+    public byte[] Memory { get; private set; } = new byte[0x1000];
 
     /// <summary>
     /// Program counter
@@ -79,6 +79,10 @@ public class Chip8Emulator
         if (!File.Exists(filename))
             throw new FileNotFoundException(filename);
 
+        Memory = new byte[0x1000];
+        PC = ProgramMemory;
+        I = 0;
+
         byte[] rom = File.ReadAllBytes(filename);
         Array.Copy(rom, 0, Memory, ProgramMemory, rom.Length);
     }
@@ -103,6 +107,7 @@ public class Chip8Emulator
                 if (RequiresRedraw)
                     _console.DrawScreen(Screen);
             }
+            Thread.Sleep(1);    // Give up control
         }
     }
 

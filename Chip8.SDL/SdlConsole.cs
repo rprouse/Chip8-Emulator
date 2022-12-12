@@ -65,9 +65,9 @@ public unsafe class SdlConsole : IConsole, IDisposable
 
     public void DrawScreen(bool[,] screen)
     {
-        for (int y = 0; y < 32; y++)
+        for (int y = 0; y < Chip8Emulator.ScreenHeight; y++)
         {
-            for (int x = 0; x < 64; x++)
+            for (int x = 0; x < Chip8Emulator.ScreenWidth; x++)
             {
                 DrawPixel(x, y, screen[x, y]);
             }
@@ -78,7 +78,6 @@ public unsafe class SdlConsole : IConsole, IDisposable
     public void ProcessEvents()
     {
         // Check for SDL events
-        CurrentKey = null;
         Event e = new Event();
         while (sdl.PollEvent(ref e) != 0)
         {
@@ -89,6 +88,9 @@ public unsafe class SdlConsole : IConsole, IDisposable
                     break;
                 case EventType.Keydown:
                     CurrentKey = GetKeyPress(e);
+                    break;
+                case EventType.Keyup:
+                    CurrentKey = null;
                     break;
             }
         }
