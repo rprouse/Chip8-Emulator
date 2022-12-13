@@ -83,7 +83,8 @@ namespace Chip8.WinForms
 
         private void OnRun(object sender, EventArgs e)
         {
-            Quit = false;
+            runToolStripMenuItem.Enabled = false;
+
             while (backgroundWorker.IsBusy)
                 Thread.Sleep(1);
 
@@ -93,6 +94,7 @@ namespace Chip8.WinForms
 
         private void RunEmulator(object? sender, DoWorkEventArgs e)
         {
+            Quit = false;
             _emulator.Run();
         }
 
