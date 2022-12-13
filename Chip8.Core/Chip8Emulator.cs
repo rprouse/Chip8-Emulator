@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Chip8.Core;
 
@@ -12,12 +13,12 @@ public class Chip8Emulator
 
     const int InstructionsPerSecond = 700;
 
-    public byte[] Memory { get; private set; } = new byte[0x1000];
+    public byte[] Memory { get; private set; }
 
     /// <summary>
     /// Program counter
     /// </summary>
-    public ushort PC { get; set; } = ProgramMemory;
+    public ushort PC { get; set; }
 
     /// <summary>
     /// Index register
@@ -27,7 +28,7 @@ public class Chip8Emulator
     /// <summary>
     /// Program stack
     /// </summary>
-    public Stack<ushort> Stack { get; } = new Stack<ushort>();
+    public Stack<ushort> Stack { get; private set; }
 
     public byte DelayTimer { get; set; }
 
@@ -36,7 +37,7 @@ public class Chip8Emulator
     /// <summary>
     /// Registers V0 to VF
     /// </summary>
-    public byte[] V { get; } = new byte[16];
+    public byte[] V { get; private set; }
 
     /// <summary>
     /// Easy access to VF
@@ -58,7 +59,7 @@ public class Chip8Emulator
     /// <summary>
     /// Screen memory
     /// </summary>
-    public bool[,] Screen { get; private set; } = new bool[ScreenWidth, ScreenHeight];
+    public bool[,] Screen { get; private set; }
 
     readonly Instructions _instructions;
 
@@ -68,23 +69,41 @@ public class Chip8Emulator
 
     public Chip8Emulator(IConsole console)
     {
-        Array.Copy(Font.Default, 0, Memory, FontMemory, Font.Default.Length);
+        Init();
         _instructions = new Instructions(this);
         _stopwatch = Stopwatch.StartNew();
         _console = console;
     }
 
-    public void LoadRom(string filename)
+    [MemberNotNull(nameof(Memory))]
+    [MemberNotNull(nameof(Stack))]
+    [MemberNotNull(nameof(V))]
+    [MemberNotNull(nameof(Screen))]
+    private void Init()
+    {
+        Memory = new byte[0x1000];
+        Array.Copy(Font.Default, 0, Memory, FontMemory, Font.Default.Length);
+        PC = ProgramMemory;
+        I = 0;
+        Stack = new Stack<ushort>();
+        DelayTimer = 0;
+        SoundTimer = 0;
+        V = new byte[16];
+        RequiresRedraw = false;
+        Screen = new bool[ScreenWidth, ScreenHeight];
+    }
+
+    public byte[] LoadRom(string filename)
     {
         if (!File.Exists(filename))
             throw new FileNotFoundException(filename);
 
-        Memory = new byte[0x1000];
-        PC = ProgramMemory;
-        I = 0;
+        Init();
 
         byte[] rom = File.ReadAllBytes(filename);
         Array.Copy(rom, 0, Memory, ProgramMemory, rom.Length);
+
+        return rom;
     }
 
     public void Run()

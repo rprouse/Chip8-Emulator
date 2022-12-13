@@ -6,6 +6,17 @@ namespace Chip8.Core;
 /// </summary>
 public static class Disassembler
 {
+    public static IEnumerable<string> Disassemble(byte[] rom, bool includeMemory)
+    {
+        for (int pc = 0; pc < rom.Length; pc += 2)
+        {
+            var opcode = new OpCode((ushort)(rom[pc] << 8 | rom[pc + 1]));
+            yield return includeMemory ?
+                $"0x{Chip8Emulator.ProgramMemory + pc:X4}: {Disassemble(opcode)}" :
+                Disassemble(opcode);
+        }
+    }
+
     public static string Disassemble(this OpCode opcode) =>
         opcode.Instruction switch
         {
@@ -25,14 +36,14 @@ public static class Disassembler
             0xD => InstructionD(opcode),
             0xE => InstructionE(opcode),
             0xF => InstructionF(opcode),
-            _ => throw new NotImplementedException($"Unrecognized OpCode {opcode}")
+            _ => opcode.ToString()
         };
 
     private static string Instruction0(OpCode opcode)
     {
         if (opcode.NN == 0xE0) return "CLS";
         if (opcode.NN == 0xEE) return "RTS";
-        return $"SYS #{opcode.NNN:X3}";
+        return opcode.ToString();
     }
 
     private static string Instruction1(OpCode opcode) =>
@@ -68,7 +79,7 @@ public static class Disassembler
             0x6 => $"SHR V{opcode.X:X1}, V{opcode.Y:X1}",
             0x7 => $"SUBN V{opcode.X:X1}, V{opcode.Y:X1}",
             0xE => $"SHL V{opcode.X:X1}, V{opcode.Y:X1}",
-            _ => throw new NotImplementedException($"Unrecognized OpCode {opcode}")
+            _ => opcode.ToString()
         };
 
     private static string Instruction9(OpCode opcode) =>
@@ -91,7 +102,7 @@ public static class Disassembler
         {
             0x9E => $"SKP V{opcode.X:X1}",
             0xA1 => $"SKNP V{opcode.X:X1}",
-            _ => throw new NotImplementedException($"Unrecognized OpCode {opcode}")
+            _ => opcode.ToString()
         };
 
     private static string InstructionF(OpCode opcode) =>
@@ -106,6 +117,6 @@ public static class Disassembler
             0x33 => $"LD B, V{opcode.X:X1}",
             0x55 => $"LD [I], V{opcode.X:X1}",
             0x65 => $"LD V{opcode.X:X1}, [I]",
-            _ => throw new NotImplementedException($"Unrecognized OpCode {opcode}")
+            _ => opcode.ToString()
         };
 }
