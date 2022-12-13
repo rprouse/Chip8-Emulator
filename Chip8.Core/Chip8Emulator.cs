@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Text;
 
 namespace Chip8.Core;
 
@@ -47,6 +48,12 @@ public class Chip8Emulator
         get => V[0x0F];
         set => V[0x0F] = value;
     }
+
+    public override string ToString() =>
+        $"PC: 0x{PC:X3}\tV0: 0x{V[0]:X2}  V4: 0x{V[4]:X2}  V8: 0x{V[8]:X2}  VC: 0x{V[0xC]:X2}\r\n" +
+        $" I: 0x{I:X4}\tV1: 0x{V[1]:X2}  V5: 0x{V[5]:X2}  V9: 0x{V[9]:X2}  VD: 0x{V[0xD]:X2}\r\n" +
+        $"DT: 0x{DelayTimer:X2}\tV2: 0x{V[2]:X2}  V6: 0x{V[6]:X2}  VA: 0x{V[0xA]:X2}  VE: 0x{V[0xD]:X2}\r\n" +
+        $"ST: 0x{SoundTimer:X2}\tV3: 0x{V[3]:X2}  V7: 0x{V[7]:X2}  VB: 0x{V[0xB]:X2}  VF: 0x{V[0xF]:X2}";
 
     /// <summary>
     /// Configuration options for the various ambiguous modes

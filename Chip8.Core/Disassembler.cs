@@ -12,7 +12,7 @@ public static class Disassembler
         {
             var opcode = new OpCode((ushort)(rom[pc] << 8 | rom[pc + 1]));
             yield return includeMemory ?
-                $"0x{Chip8Emulator.ProgramMemory + pc:X4}: {Disassemble(opcode)}" :
+                $"0x{Chip8Emulator.ProgramMemory + pc:X3}: 0x{opcode.Data:X4} {Disassemble(opcode)}" :
                 Disassemble(opcode);
         }
     }

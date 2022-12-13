@@ -25,6 +25,8 @@ namespace Chip8.WinForms
         {
             InitializeComponent();
             _emulator = new Chip8Emulator(this);
+            DrawRegisters();
+            menuStrip.Renderer = new GreenScreenMenuRenderer();
         }
 
         public bool Quit { get; private set; }
@@ -50,6 +52,7 @@ namespace Chip8.WinForms
                 return;
             }
 
+            DrawRegisters();
             image.SetResolution(this.DeviceDpi, this.DeviceDpi);
             Graphics g = Graphics.FromImage(image);
             g.FillRectangle(Brushes.Black, 0, 0, ScreenWidth, ScreenHeight);
@@ -62,6 +65,11 @@ namespace Chip8.WinForms
                 }
             }
             this.screen.Image = image;
+        }
+
+        private void DrawRegisters()
+        {
+            registers.Text = _emulator.ToString();
         }
 
         public void ProcessEvents()
@@ -171,4 +179,98 @@ namespace Chip8.WinForms
             return key;
         }
     }
+}
+public class GreenScreenMenuRenderer : ToolStripProfessionalRenderer
+{
+    public GreenScreenMenuRenderer() : base(new GreenScreenColors()) { }
+
+    protected override void OnRenderItemText(ToolStripItemTextRenderEventArgs e)
+    {
+        if (e.Item.Selected)
+        {
+            e.Item.BackColor = Color.Green;
+            e.Item.ForeColor = Color.Black;
+        }
+        else
+        {
+            e.Item.BackColor = Color.Black;
+            e.Item.ForeColor = Color.Green;
+        }
+        base.OnRenderItemText(e);
+    }
+
+    protected override void OnRenderMenuItemBackground(ToolStripItemRenderEventArgs e)
+    {
+        if (e.Item.Selected)
+        {
+            e.Item.BackColor = Color.Green;
+            e.Item.ForeColor = Color.Black;
+        }
+        else
+        {
+            e.Item.BackColor = Color.Black;
+            e.Item.ForeColor = Color.Green;
+        }
+        base.OnRenderMenuItemBackground(e);
+    }
+
+    protected override void OnRenderToolStripBackground(ToolStripRenderEventArgs e)
+    {
+        e.ToolStrip.BackColor = Color.Black;
+        e.ToolStrip.ForeColor = Color.Green;
+        base.OnRenderToolStripBackground(e);
+    }
+
+    protected override void OnRenderButtonBackground(ToolStripItemRenderEventArgs e)
+    {
+        if (e.Item.Selected)
+        {
+            e.Item.BackColor = Color.Green;
+            e.Item.ForeColor = Color.Black;
+        }
+        else
+        {
+            e.Item.BackColor = Color.Black;
+            e.Item.ForeColor = Color.Green;
+        }
+        base.OnRenderButtonBackground(e);
+    }
+
+    protected override void OnRenderItemImage(ToolStripItemImageRenderEventArgs e)
+    {
+        if (e.Item.Selected)
+        {
+            e.Item.BackColor = Color.Green;
+            e.Item.ForeColor = Color.Black;
+        }
+        else
+        {
+            e.Item.BackColor = Color.Black;
+            e.Item.ForeColor = Color.Green;
+        }
+        base.OnRenderItemImage(e);
+    }
+}
+
+public class GreenScreenColors : ProfessionalColorTable
+{
+    public override Color MenuItemSelected => Color.Black;
+    public override Color MenuItemBorder => Color.Green;
+    //public override Color MenuItemSelectedGradientBegin => Color.Green;
+    //public override Color MenuItemSelectedGradientEnd => Color.Green;
+    public override Color MenuBorder => Color.Green;
+    //public override Color MenuStripGradientBegin => Color.Black;
+    //public override Color MenuStripGradientEnd => Color.Black;
+    //public override Color MenuItemPressedGradientBegin => base.MenuItemPressedGradientBegin;
+    //public override Color MenuItemPressedGradientEnd => base.MenuItemPressedGradientEnd;
+    //public override Color MenuItemPressedGradientMiddle => base.MenuItemPressedGradientMiddle;
+    public override Color ToolStripBorder => Color.Green;
+    //public override Color ToolStripContentPanelGradientBegin => base.ToolStripContentPanelGradientBegin;
+    //public override Color ToolStripContentPanelGradientEnd => base.ToolStripContentPanelGradientEnd;
+    public override Color ToolStripDropDownBackground => Color.Black;
+    //public override Color ToolStripGradientBegin => base.ToolStripGradientBegin;
+    //public override Color ToolStripGradientEnd => base.ToolStripGradientEnd;
+    //public override Color ToolStripGradientMiddle => base.ToolStripGradientMiddle;
+    //public override Color ToolStripPanelGradientBegin => base.ToolStripPanelGradientBegin;
+    //public override Color ToolStripPanelGradientEnd => base.ToolStripPanelGradientEnd;
 }
