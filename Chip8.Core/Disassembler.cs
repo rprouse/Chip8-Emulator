@@ -8,7 +8,7 @@ public static class Disassembler
 {
     public static IEnumerable<string> Disassemble(byte[] rom, bool includeMemory)
     {
-        for (int pc = 0; pc < rom.Length; pc += 2)
+        for (int pc = 0; pc < rom.Length - 1; pc += 2)
         {
             var opcode = new OpCode((ushort)(rom[pc] << 8 | rom[pc + 1]));
             yield return includeMemory ?
