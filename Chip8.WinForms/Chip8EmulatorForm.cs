@@ -19,6 +19,7 @@ namespace Chip8.WinForms
         const int ScreenHeight = Chip8Emulator.ScreenHeight * PixelSize;
 
         Chip8Emulator _emulator;
+        Bitmap image = new Bitmap(ScreenWidth, ScreenHeight);
 
         public Chip8EmulatorForm()
         {
@@ -49,7 +50,6 @@ namespace Chip8.WinForms
                 return;
             }
 
-            Bitmap image = new Bitmap(ScreenWidth, ScreenHeight);
             Graphics g = Graphics.FromImage(image);
             g.FillRectangle(Brushes.Black, 0, 0, ScreenWidth, ScreenHeight);
             for (int y = 0; y < Chip8Emulator.ScreenHeight; y++)
@@ -73,13 +73,20 @@ namespace Chip8.WinForms
             Quit = true;
             if (openFileDialog.ShowDialog(this) == DialogResult.OK)
             {
-                _emulator.LoadRom(openFileDialog.FileName);
+                var rom = _emulator.LoadRom(openFileDialog.FileName);
+                disassemblyList.Items.Clear();
+                foreach(string instr in Disassembler.Disassemble(rom, true))
+                    disassemblyList.Items.Add(instr);
                 runToolStripMenuItem.Enabled = true;
             }
         }
 
         private void OnRun(object sender, EventArgs e)
         {
+            Quit = false;
+            while (backgroundWorker.IsBusy)
+                Thread.Sleep(1);
+
             backgroundWorker.DoWork += new DoWorkEventHandler(RunEmulator);
             backgroundWorker.RunWorkerAsync();
         }

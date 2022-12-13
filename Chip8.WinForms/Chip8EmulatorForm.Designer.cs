@@ -1,4 +1,4 @@
-﻿namespace Chip8.WinForms
+namespace Chip8.WinForms
 {
     partial class Chip8EmulatorForm
     {
@@ -35,6 +35,7 @@
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.screen = new System.Windows.Forms.PictureBox();
             this.backgroundWorker = new System.ComponentModel.BackgroundWorker();
+            this.disassemblyList = new System.Windows.Forms.ListBox();
             this.menuStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.screen)).BeginInit();
             this.SuspendLayout();
@@ -46,7 +47,7 @@
             this.runToolStripMenuItem});
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
-            this.menuStrip.Size = new System.Drawing.Size(639, 24);
+            this.menuStrip.Size = new System.Drawing.Size(833, 24);
             this.menuStrip.TabIndex = 0;
             this.menuStrip.Text = "menuStrip1";
             // 
@@ -87,11 +88,24 @@
             this.screen.TabIndex = 1;
             this.screen.TabStop = false;
             // 
+            // disassemblyList
+            // 
+            this.disassemblyList.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.disassemblyList.FormattingEnabled = true;
+            this.disassemblyList.ItemHeight = 15;
+            this.disassemblyList.Location = new System.Drawing.Point(646, 25);
+            this.disassemblyList.Name = "disassemblyList";
+            this.disassemblyList.Size = new System.Drawing.Size(187, 319);
+            this.disassemblyList.TabIndex = 2;
+            // 
             // Chip8EmulatorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(639, 344);
+            this.ClientSize = new System.Drawing.Size(833, 344);
+            this.Controls.Add(this.disassemblyList);
             this.Controls.Add(this.screen);
             this.Controls.Add(this.menuStrip);
             this.MainMenuStrip = this.menuStrip;
@@ -117,5 +131,6 @@
         private ToolStripMenuItem runToolStripMenuItem;
         private PictureBox screen;
         private System.ComponentModel.BackgroundWorker backgroundWorker;
+        private ListBox disassemblyList;
     }
 }

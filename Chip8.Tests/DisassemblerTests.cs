@@ -14,7 +14,7 @@ namespace Chip8.Tests
         {
             yield return new TestCaseData(new OpCode(0x00E0), "CLS");
             yield return new TestCaseData(new OpCode(0x00EE), "RTS");
-            yield return new TestCaseData(new OpCode(0x0123), "SYS #123");
+            yield return new TestCaseData(new OpCode(0x0123), "0x0123");
             yield return new TestCaseData(new OpCode(0x12A8), "JP #2A8");
             yield return new TestCaseData(new OpCode(0x22FA), "CALL #2FA");
             yield return new TestCaseData(new OpCode(0x37AB), "SE V7, #AB");
