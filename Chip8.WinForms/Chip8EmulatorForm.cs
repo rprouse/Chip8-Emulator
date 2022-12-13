@@ -50,6 +50,7 @@ namespace Chip8.WinForms
                 return;
             }
 
+            image.SetResolution(this.DeviceDpi, this.DeviceDpi);
             Graphics g = Graphics.FromImage(image);
             g.FillRectangle(Brushes.Black, 0, 0, ScreenWidth, ScreenHeight);
             for (int y = 0; y < Chip8Emulator.ScreenHeight; y++)

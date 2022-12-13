@@ -42,12 +42,14 @@ namespace Chip8.WinForms
             // 
             // menuStrip
             // 
+            this.menuStrip.ImageScalingSize = new System.Drawing.Size(32, 32);
             this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
             this.runToolStripMenuItem});
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
-            this.menuStrip.Size = new System.Drawing.Size(833, 24);
+            this.menuStrip.Padding = new System.Windows.Forms.Padding(11, 4, 0, 4);
+            this.menuStrip.Size = new System.Drawing.Size(1772, 44);
             this.menuStrip.TabIndex = 0;
             this.menuStrip.Text = "menuStrip1";
             // 
@@ -56,13 +58,13 @@ namespace Chip8.WinForms
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.openToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(71, 36);
             this.fileToolStripMenuItem.Text = "&File";
             // 
             // openToolStripMenuItem
             // 
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(112, 22);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(221, 44);
             this.openToolStripMenuItem.Text = "&Open...";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.OnFileOpen);
             // 
@@ -70,7 +72,7 @@ namespace Chip8.WinForms
             // 
             this.runToolStripMenuItem.Enabled = false;
             this.runToolStripMenuItem.Name = "runToolStripMenuItem";
-            this.runToolStripMenuItem.Size = new System.Drawing.Size(40, 20);
+            this.runToolStripMenuItem.Size = new System.Drawing.Size(76, 36);
             this.runToolStripMenuItem.Text = "&Run";
             this.runToolStripMenuItem.Click += new System.EventHandler(this.OnRun);
             // 
@@ -81,34 +83,45 @@ namespace Chip8.WinForms
             // 
             // screen
             // 
+            this.screen.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.screen.BackColor = System.Drawing.Color.Black;
-            this.screen.Location = new System.Drawing.Point(0, 24);
+            this.screen.Location = new System.Drawing.Point(0, 51);
+            this.screen.Margin = new System.Windows.Forms.Padding(6);
             this.screen.Name = "screen";
-            this.screen.Size = new System.Drawing.Size(640, 320);
+            this.screen.Size = new System.Drawing.Size(1375, 985);
+            this.screen.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.screen.TabIndex = 1;
             this.screen.TabStop = false;
             // 
             // disassemblyList
             // 
-            this.disassemblyList.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.disassemblyList.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.disassemblyList.BackColor = System.Drawing.Color.Black;
+            this.disassemblyList.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.disassemblyList.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.disassemblyList.ForeColor = System.Drawing.Color.Lime;
             this.disassemblyList.FormattingEnabled = true;
-            this.disassemblyList.ItemHeight = 15;
-            this.disassemblyList.Location = new System.Drawing.Point(646, 25);
+            this.disassemblyList.ItemHeight = 28;
+            this.disassemblyList.Location = new System.Drawing.Point(1387, 53);
+            this.disassemblyList.Margin = new System.Windows.Forms.Padding(6);
             this.disassemblyList.Name = "disassemblyList";
-            this.disassemblyList.Size = new System.Drawing.Size(187, 319);
+            this.disassemblyList.Size = new System.Drawing.Size(382, 980);
             this.disassemblyList.TabIndex = 2;
             // 
             // Chip8EmulatorForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 32F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(833, 344);
+            this.BackColor = System.Drawing.Color.Black;
+            this.ClientSize = new System.Drawing.Size(1772, 1036);
             this.Controls.Add(this.disassemblyList);
             this.Controls.Add(this.screen);
             this.Controls.Add(this.menuStrip);
             this.MainMenuStrip = this.menuStrip;
+            this.Margin = new System.Windows.Forms.Padding(6);
             this.Name = "Chip8EmulatorForm";
             this.Text = "Chip8";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.OnClosing);
