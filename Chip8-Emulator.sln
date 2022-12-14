@@ -9,6 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
+		chip-8.png = chip-8.png
 		LICENSE.txt = LICENSE.txt
 		README.md = README.md
 	EndProjectSection
@@ -60,7 +61,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Workflows", "Workflows", "{
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chip8.SDL", "Chip8.SDL\Chip8.SDL.csproj", "{D9A24E42-8BA2-432B-BCB1-0D8F80C23C2D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chip8.WinForms", "Chip8.WinForms\Chip8.WinForms.csproj", "{06EA8077-E984-4E30-B7C8-976EA77BEC33}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chip8.WinForms", "Chip8.WinForms\Chip8.WinForms.csproj", "{06EA8077-E984-4E30-B7C8-976EA77BEC33}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
