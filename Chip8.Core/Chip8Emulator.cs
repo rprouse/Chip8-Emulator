@@ -121,7 +121,7 @@ public class Chip8Emulator
             _console.ProcessEvents();
 
             // Slow down the Chip-8
-            if (stopwatch.ElapsedMilliseconds > 1000 / InstructionsPerSecond)
+            if (stopwatch.ElapsedTicks > 1000 / InstructionsPerSecond)
             {
                 stopwatch.Restart();
 
@@ -132,8 +132,9 @@ public class Chip8Emulator
                 // Redraw screen if necessary
                 if (RequiresRedraw)
                     _console.DrawScreen(Screen);
+
+                Thread.Sleep(0);    // Give up control
             }
-            Thread.Sleep(1);    // Give up control
         }
     }
 

@@ -1,14 +1,6 @@
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+using System.Drawing.Imaging;
 using Chip8.Core;
-using static System.Runtime.CompilerServices.RuntimeHelpers;
 
 namespace Chip8.WinForms
 {
@@ -19,7 +11,6 @@ namespace Chip8.WinForms
         const int ScreenHeight = Chip8Emulator.ScreenHeight * PixelSize;
 
         Chip8Emulator _emulator;
-        Bitmap image = new Bitmap(ScreenWidth, ScreenHeight);
 
         public Chip8EmulatorForm()
         {
@@ -53,7 +44,7 @@ namespace Chip8.WinForms
             }
 
             DrawRegisters();
-            image.SetResolution(this.DeviceDpi, this.DeviceDpi);
+            Bitmap image = new Bitmap(ScreenWidth, ScreenHeight);
             Graphics g = Graphics.FromImage(image);
             g.FillRectangle(Brushes.Black, 0, 0, ScreenWidth, ScreenHeight);
             for (int y = 0; y < Chip8Emulator.ScreenHeight; y++)
