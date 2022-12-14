@@ -43,14 +43,16 @@ namespace Chip8.WinForms
             // 
             // menuStrip
             // 
+            this.menuStrip.Font = new System.Drawing.Font("Consolas", 10.875F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.menuStrip.ImageScalingSize = new System.Drawing.Size(32, 32);
             this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
             this.runToolStripMenuItem});
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
+            this.menuStrip.Padding = new System.Windows.Forms.Padding(11, 4, 0, 4);
             this.menuStrip.RenderMode = System.Windows.Forms.ToolStripRenderMode.Professional;
-            this.menuStrip.Size = new System.Drawing.Size(1008, 24);
+            this.menuStrip.Size = new System.Drawing.Size(1872, 46);
             this.menuStrip.TabIndex = 0;
             this.menuStrip.Text = "menuStrip";
             // 
@@ -60,14 +62,15 @@ namespace Chip8.WinForms
             this.openToolStripMenuItem});
             this.fileToolStripMenuItem.ForeColor = System.Drawing.Color.Green;
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(99, 38);
             this.fileToolStripMenuItem.Text = "&File";
             // 
             // openToolStripMenuItem
             // 
+            this.openToolStripMenuItem.BackColor = System.Drawing.Color.Black;
             this.openToolStripMenuItem.ForeColor = System.Drawing.Color.Green;
             this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.openToolStripMenuItem.Size = new System.Drawing.Size(359, 44);
             this.openToolStripMenuItem.Text = "&Open...";
             this.openToolStripMenuItem.Click += new System.EventHandler(this.OnFileOpen);
             // 
@@ -76,7 +79,7 @@ namespace Chip8.WinForms
             this.runToolStripMenuItem.Enabled = false;
             this.runToolStripMenuItem.ForeColor = System.Drawing.Color.Green;
             this.runToolStripMenuItem.Name = "runToolStripMenuItem";
-            this.runToolStripMenuItem.Size = new System.Drawing.Size(40, 20);
+            this.runToolStripMenuItem.Size = new System.Drawing.Size(83, 38);
             this.runToolStripMenuItem.Text = "&Run";
             this.runToolStripMenuItem.Click += new System.EventHandler(this.OnRun);
             // 
@@ -91,9 +94,10 @@ namespace Chip8.WinForms
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.screen.BackColor = System.Drawing.Color.Black;
-            this.screen.Location = new System.Drawing.Point(0, 24);
+            this.screen.Location = new System.Drawing.Point(0, 51);
+            this.screen.Margin = new System.Windows.Forms.Padding(6);
             this.screen.Name = "screen";
-            this.screen.Size = new System.Drawing.Size(712, 611);
+            this.screen.Size = new System.Drawing.Size(1322, 1303);
             this.screen.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.screen.TabIndex = 1;
             this.screen.TabStop = false;
@@ -107,11 +111,11 @@ namespace Chip8.WinForms
             this.disassemblyList.Font = new System.Drawing.Font("Consolas", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.disassemblyList.ForeColor = System.Drawing.Color.Green;
             this.disassemblyList.FormattingEnabled = true;
-            this.disassemblyList.ItemHeight = 18;
-            this.disassemblyList.Location = new System.Drawing.Point(721, 25);
-            this.disassemblyList.Margin = new System.Windows.Forms.Padding(6);
+            this.disassemblyList.ItemHeight = 36;
+            this.disassemblyList.Location = new System.Drawing.Point(1339, 53);
+            this.disassemblyList.Margin = new System.Windows.Forms.Padding(11, 13, 11, 13);
             this.disassemblyList.Name = "disassemblyList";
-            this.disassemblyList.Size = new System.Drawing.Size(286, 702);
+            this.disassemblyList.Size = new System.Drawing.Size(531, 1476);
             this.disassemblyList.TabIndex = 2;
             // 
             // registers
@@ -122,25 +126,26 @@ namespace Chip8.WinForms
             this.registers.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.registers.Font = new System.Drawing.Font("Consolas", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.registers.ForeColor = System.Drawing.Color.Green;
-            this.registers.Location = new System.Drawing.Point(15, 644);
-            this.registers.Margin = new System.Windows.Forms.Padding(6);
+            this.registers.Location = new System.Drawing.Point(28, 1374);
+            this.registers.Margin = new System.Windows.Forms.Padding(11, 13, 11, 13);
             this.registers.Multiline = true;
             this.registers.Name = "registers";
-            this.registers.Size = new System.Drawing.Size(697, 84);
+            this.registers.Size = new System.Drawing.Size(1294, 179);
             this.registers.TabIndex = 3;
             // 
             // Chip8EmulatorForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 32F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Black;
-            this.ClientSize = new System.Drawing.Size(1008, 729);
+            this.ClientSize = new System.Drawing.Size(1872, 1555);
             this.Controls.Add(this.registers);
             this.Controls.Add(this.disassemblyList);
             this.Controls.Add(this.screen);
             this.Controls.Add(this.menuStrip);
             this.MainMenuStrip = this.menuStrip;
-            this.MinimumSize = new System.Drawing.Size(800, 600);
+            this.Margin = new System.Windows.Forms.Padding(6);
+            this.MinimumSize = new System.Drawing.Size(1463, 1200);
             this.Name = "Chip8EmulatorForm";
             this.Text = "Chip8";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.OnClosing);
