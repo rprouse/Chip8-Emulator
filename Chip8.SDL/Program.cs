@@ -7,9 +7,9 @@ using (var console = new SdlConsole())
 {
     if (!console.Init())
         return -1;
-    var chip8 = new Chip8Emulator(console);
-    chip8.LoadRom(@"..\..\..\..\roms\Chip8 picture.ch8");
-    chip8.Run();
+    console.Chip8Emulator = new Chip8Emulator(console);
+    console.Chip8Emulator.LoadRom(@"..\..\..\..\roms\Chip8 picture.ch8");
+    console.Chip8Emulator.Run();
 }
 return 0;
 

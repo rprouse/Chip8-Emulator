@@ -6,7 +6,7 @@ public class Instructions
 
     readonly Action<OpCode>[] _instructions;
 
-    byte? _currentKey;
+    bool[] _currentKeys = new bool[0x10];
 
     public Instructions(Chip8Emulator chip8)
     {
@@ -20,11 +20,10 @@ public class Instructions
         };
     }
 
-    public void Execute(OpCode opcode, byte? key)
+    public void Execute(OpCode opcode, bool[] keys)
     {
-        _currentKey = key;
+        _currentKeys = keys;
         _instructions[opcode.Instruction](opcode);
-        _currentKey = null;
     }
 
     // 00E0 - CLS
@@ -220,13 +219,11 @@ public class Instructions
         switch (opcode.NN)
         {
             case 0x9E:
-                if (_currentKey.HasValue && 
-                    _currentKey.Value == opcode.X)
+                if (opcode.X < 0x10 && _currentKeys[opcode.X])
                     _chip8.PC += 2;
                 break;
             case 0xA1:
-                if (!_currentKey.HasValue || 
-                    _currentKey.Value != opcode.X)
+                if (opcode.X >= 0x10 || !_currentKeys[opcode.X])
                     _chip8.PC += 2;
                 break;
             default:
@@ -251,10 +248,15 @@ public class Instructions
                 _chip8.V[opcode.X] = _chip8.DelayTimer;
                 break;
             case 0x0A:  // Get key
-                if (_currentKey.HasValue)
-                    _chip8.V[opcode.X] = _currentKey.Value;
+                if (_currentKeys.Any(k => k))
+                {
+                    for (byte k = 0; k < 0x10; k++)
+                        if (_currentKeys[k]) _chip8.V[opcode.X] = k;
+                }
                 else
+                {
                     _chip8.PC -= 2;
+                }
                 break;
             case 0x15:  // Read delay timer
                 _chip8.DelayTimer = _chip8.V[opcode.X];

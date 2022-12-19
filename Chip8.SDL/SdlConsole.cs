@@ -1,6 +1,7 @@
 using Chip8.Core;
 using Silk.NET.Maths;
 using Silk.NET.SDL;
+using System;
 
 namespace Chip8.SDL;
 
@@ -12,7 +13,7 @@ public unsafe class SdlConsole : IConsole, IDisposable
 
     public bool Quit { get; private set; }
 
-    public byte? CurrentKey { get; private set; }
+    public Chip8Emulator Chip8Emulator { get; set; }
 
     private Sdl sdl;
     private Window* window;
@@ -87,11 +88,19 @@ public unsafe class SdlConsole : IConsole, IDisposable
                     Quit = true;
                     break;
                 case EventType.Keydown:
-                    CurrentKey = GetKeyPress(e);
-                    break;
+                    {
+                        byte? key = GetKeyPress(e);
+                        if (key.HasValue)
+                            Chip8Emulator.SetKey(key.Value);
+                        break;
+                    }
                 case EventType.Keyup:
-                    CurrentKey = null;
-                    break;
+                    {
+                        byte? key = GetKeyPress(e);
+                        if (key.HasValue)
+                            Chip8Emulator.UnsetKey(key.Value);
+                        break;
+                    }
             }
         }
     }

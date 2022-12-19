@@ -11,11 +11,6 @@ public interface IConsole
     bool Quit { get; }
 
     /// <summary>
-    /// The current key that has been pressed
-    /// </summary>
-    byte? CurrentKey { get; }
-
-    /// <summary>
     /// Draws the screen
     /// </summary>
     /// <param name="screen"></param>

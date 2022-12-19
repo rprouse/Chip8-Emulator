@@ -22,8 +22,6 @@ namespace Chip8.WinForms
 
         public bool Quit { get; private set; }
 
-        public byte? CurrentKey { get; private set; }
-
         public void Beep()
         {
             if (this.Disposing || this.IsDisposed) return;
@@ -105,12 +103,16 @@ namespace Chip8.WinForms
 
         private void OnKeyDown(object sender, KeyEventArgs e)
         {
-            CurrentKey = GetKeyPress(e.KeyCode);
+            byte? key = GetKeyPress(e.KeyCode);
+            if (key.HasValue)
+                _emulator.SetKey(key.Value);
         }
 
         private void OnKeyUp(object sender, KeyEventArgs e)
         {
-            CurrentKey = null;
+            byte? key = GetKeyPress(e.KeyCode);
+            if (key.HasValue)
+                _emulator.UnsetKey(key.Value);
         }
 
         static byte? GetKeyPress(Keys keyCode)

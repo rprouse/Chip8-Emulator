@@ -68,6 +68,8 @@ public class Chip8Emulator
     /// </summary>
     public bool[,] Screen { get; private set; }
 
+    private bool[] _keys;
+
     readonly Instructions _instructions;
 
     readonly Stopwatch _stopwatch;
@@ -98,6 +100,7 @@ public class Chip8Emulator
         V = new byte[16];
         RequiresRedraw = false;
         Screen = new bool[ScreenWidth, ScreenHeight];
+        _keys = new bool[0x10];
     }
 
     public byte[] LoadRom(string filename)
@@ -126,7 +129,7 @@ public class Chip8Emulator
                 stopwatch.Restart();
 
                 // SingleStep the Chip-8 emulator
-                if (SingleStep(_console.CurrentKey))
+                if (SingleStep())
                     _console.Beep();
 
                 // Redraw screen if necessary
@@ -141,13 +144,12 @@ public class Chip8Emulator
     /// <summary>
     /// Executes one instruction
     /// </summary>
-    /// <param name="key">Any key that is currently pressed</param>
     /// <returns>True if a beep should be played.</returns>
-    public bool SingleStep(byte? key)
+    public bool SingleStep()
     {
         RequiresRedraw = false;
         var opcode = new OpCode((ushort)(Memory[PC++] << 8 | Memory[PC++]));
-        _instructions.Execute(opcode, key);
+        _instructions.Execute(opcode, _keys);
 
         // Decrement timers. Technically, this should happen every 16.66 MS.
         if (_stopwatch.ElapsedMilliseconds > 16)
@@ -171,5 +173,17 @@ public class Chip8Emulator
     {
         Screen[x, y] = on;
         RequiresRedraw = true;
+    }
+
+    public void SetKey(byte key)
+    {
+        if (key > 0x0f) return;
+        _keys[key] = true;
+    }
+
+    public void UnsetKey(byte key)
+    {
+        if (key > 0x0f) return;
+        _keys[key] = false;
     }
 }
